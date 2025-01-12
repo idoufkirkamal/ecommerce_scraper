@@ -1,7 +1,9 @@
-requests
-beautifulsoup4
+requests~=2.32.3
+beautifulsoup4~=4.12.3
 selenium
 pandas
 matplotlib
 flask
 schedule
+
+fake-useragent~=2.0.3
