@@ -17,56 +17,64 @@ USER_AGENTS = [
     'Mozilla/5.0 (iPad; CPU OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
 ]
 
-
 # Fonction pour scraper une seule page
 def scrape_amazon_page(url):
-    # Selectionner un User-Agent aléatoire
+    # Sélectionner un User-Agent aléatoire
     headers = {
         'User-Agent': random.choice(USER_AGENTS),
         'Accept-Language': 'en-US, en;q=0.5'
     }
 
-    # Envoyer une requête HTTP
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    try:
+        # Envoyer une requête HTTP
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()  # Lever une erreur pour les codes HTTP 4xx/5xx
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Trouver les produits sur la page
-    results = soup.find_all('div', {'data-component-type': 's-search-result'})
-    result_list = []
+        # Trouver les produits sur la page
+        results = soup.find_all('div', {'data-component-type': 's-search-result'})
+        if not results:
+            print("No results found on this page.")
+            return []
 
-    # Date actuelle (pour suivi de la collecte)
-    collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        result_list = []
+        collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    for r in results:
-        result_dict = {}
+        for r in results:
+            result_dict = {}
 
-        # Extraire le titre
-        title_element = r.select_one('.a-size-medium.a-color-base.a-text-normal')
-        result_dict["title"] = title_element.text.strip() if title_element else "Title not available"
+            # Extraire le titre
+            title_element = r.select_one('.a-size-medium.a-color-base.a-text-normal')
+            result_dict["title"] = title_element.text.strip() if title_element else "Title not available"
 
-        # Extraire le prix
-        price_element = r.select_one('.a-price .a-offscreen')
-        result_dict["price"] = price_element.text.strip() if price_element else "Price not available"
+            # Extraire le prix
+            price_element = r.select_one('.a-price .a-offscreen')
+            result_dict["price"] = price_element.text.strip() if price_element else "Price not available"
 
-        # Extraire l'URL de l'image
+            # Extraire l'URL de l'image
+            image_element = r.select_one('.s-image')
+            result_dict["image_url"] = image_element['src'] if image_element else "Image not available"
 
-        # Extraire les promotions (réductions, offres spéciales)
-        promo_element = r.select_one(
-            '.a-row.a-size-base.a-color-secondary.s-align-children-center span.a-color-base.a-text-bold')
-        result_dict["promo"] = promo_element.text.strip() if promo_element else "No promotion"
+            # Extraire les promotions (réductions, offres spéciales)
+            promo_element = r.select_one(
+                '.a-row.a-size-base.a-color-secondary.s-align-children-center span.a-color-base.a-text-bold')
+            result_dict["promo"] = promo_element.text.strip() if promo_element else "No promotion"
 
-        # Coupons (exemple de coupon avec réduction)
-        coupon_element = r.select_one('.s-coupon-clipped .a-color-base')
-        result_dict["coupon"] = coupon_element.text.strip() if coupon_element else "No coupon"
+            # Coupons (exemple de coupon avec réduction)
+            coupon_element = r.select_one('.s-coupon-clipped .a-color-base')
+            result_dict["coupon"] = coupon_element.text.strip() if coupon_element else "No coupon"
 
-        # Indiquer la date de collecte
-        result_dict["collection_date"] = collection_date
+            # Indiquer la date de collecte
+            result_dict["collection_date"] = collection_date
 
-        # Ajouter le dictionnaire des résultats à la liste
-        result_list.append(result_dict)
+            # Ajouter le dictionnaire des résultats à la liste
+            result_list.append(result_dict)
 
-    return result_list
+        return result_list
 
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred while scraping {url}: {e}")
+        return []
 
 # Fonction pour scraper plusieurs pages et enregistrer au format CSV
 def scrape_amazon(search_query, num_pages):
@@ -77,15 +85,23 @@ def scrape_amazon(search_query, num_pages):
         print(f"Scraping page {page}...")
         url = base_url + str(page)
         page_results = scrape_amazon_page(url)
+
+        if not page_results:
+            print("No more pages or an error occurred. Stopping.")
+            break
+
         all_results.extend(page_results)
 
         # Pause aléatoire pour éviter le blocage
-        random_delay = random.randint(2, 5)
+        random_delay = random.randint(5, 15)  # Pause entre 5 et 15 secondes
         print(f"Waiting {random_delay} seconds to avoid detection...")
         time.sleep(random_delay)
 
     # Convertir les résultats au format DataFrame
     df = pd.DataFrame(all_results)
+
+    # Gestion des données manquantes
+    df.fillna("Data not available", inplace=True)
 
     # Créer le dossier 'data' s'il n'existe pas
     output_dir = r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw"
@@ -99,7 +115,6 @@ def scrape_amazon(search_query, num_pages):
     print(f"Data saved to {csv_file_path}")
 
     return all_results
-
 
 # Script principal
 if __name__ == "__main__":
