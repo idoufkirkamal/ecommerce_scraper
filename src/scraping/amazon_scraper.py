@@ -1,85 +1,129 @@
+import time
+import random
 import requests
 from bs4 import BeautifulSoup
-import time
-from fake_useragent import UserAgent
+import pandas as pd
+import os
+from datetime import datetime
 
+# Liste des User-Agents pour rotation
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0',
+    'Mozilla/5.0 (iPad; CPU OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+]
 
-# Function to fetch a URL with retries
-def fetch_url(url, headers, retries=3):
-    for attempt in range(retries):
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            if response.status_code == 200:
-                return response
-            else:
-                print(f"Received status code {response.status_code}, retrying...")
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-            time.sleep(2)  # Wait before retrying
-    return None  # Return None if all retries fail
+# Fonction pour scraper une seule page
+def scrape_amazon_page(url):
+    # Sélectionner un User-Agent aléatoire
+    headers = {
+        'User-Agent': random.choice(USER_AGENTS),
+        'Accept-Language': 'en-US, en;q=0.5'
+    }
 
+    try:
+        # Envoyer une requête HTTP
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()  # Lever une erreur pour les codes HTTP 4xx/5xx
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-# Function to scrape a single Amazon search results page
-def scrape_page(url, headers):
-    html = fetch_url(url, headers)
-    if not html:
-        print("Failed to fetch the URL.")
+        # Trouver les produits sur la page
+        results = soup.find_all('div', {'data-component-type': 's-search-result'})
+        if not results:
+            print("No results found on this page.")
+            return []
+
+        result_list = []
+        collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        for r in results:
+            result_dict = {}
+
+            # Extraire le titre
+            title_element = r.select_one('.a-size-medium.a-color-base.a-text-normal')
+            result_dict["title"] = title_element.text.strip() if title_element else "Title not available"
+
+            # Extraire le prix
+            price_element = r.select_one('.a-price .a-offscreen')
+            result_dict["price"] = price_element.text.strip() if price_element else "Price not available"
+
+            # Extraire l'URL de l'image
+            image_element = r.select_one('.s-image')
+            result_dict["image_url"] = image_element['src'] if image_element else "Image not available"
+
+            # Extraire les promotions (réductions, offres spéciales)
+            promo_element = r.select_one(
+                '.a-row.a-size-base.a-color-secondary.s-align-children-center span.a-color-base.a-text-bold')
+            result_dict["promo"] = promo_element.text.strip() if promo_element else "No promotion"
+
+            # Coupons (exemple de coupon avec réduction)
+            coupon_element = r.select_one('.s-coupon-clipped .a-color-base')
+            result_dict["coupon"] = coupon_element.text.strip() if coupon_element else "No coupon"
+
+            # Indiquer la date de collecte
+            result_dict["collection_date"] = collection_date
+
+            # Ajouter le dictionnaire des résultats à la liste
+            result_list.append(result_dict)
+
+        return result_list
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred while scraping {url}: {e}")
         return []
 
-    soup = BeautifulSoup(html.text, "html.parser")
-    results = soup.find_all('div', attrs={'data-component-type': 's-search-result'})
+# Fonction pour scraper plusieurs pages et enregistrer au format CSV
+def scrape_amazon(search_query, num_pages):
+    base_url = f"https://www.amazon.com/s?k={search_query.replace(' ', '+')}&page="
+    all_results = []
 
-    product_list = []
-    for r in results:
-        # Extract title and price, handle missing elements properly
-        title = r.select_one('.a-text-normal')
-        price = r.select_one('.a-price .a-offscreen')
-
-        product = {
-            "title": title.text.strip() if title else "N/A",
-            "price": price.text.strip() if price else "N/A"
-        }
-        product_list.append(product)
-
-    return product_list
-
-
-# Pagination scraping
-def scrape_amazon(search_url, max_pages=5):
-    user_agent = UserAgent()  # Initialize random User-Agent generator
-    all_products = []
-
-    for page in range(1, max_pages + 1):  # Iterate over multiple pages
+    for page in range(1, num_pages + 1):
         print(f"Scraping page {page}...")
-        paginated_url = f"{search_url}&page={page}"
-        headers = {
-            'User-Agent': user_agent.random,  # Rotate User-Agent
-            'Accept-Language': 'en-US,en;q=0.5'
-        }
+        url = base_url + str(page)
+        page_results = scrape_amazon_page(url)
 
-        # Scrape the current page
-        products = scrape_page(paginated_url, headers)
-        if products:
-            all_products.extend(products)
-        else:
-            print(f"No products found on page {page}. Stopping.")
-            break  # Stop if no products are found (end of results)
+        if not page_results:
+            print("No more pages or an error occurred. Stopping.")
+            break
 
-        # Respect Amazon's anti-scraping measures by delaying requests
-        time.sleep(2)
+        all_results.extend(page_results)
 
-    return all_products
+        # Pause aléatoire pour éviter le blocage
+        random_delay = random.randint(5, 15)  # Pause entre 5 et 15 secondes
+        print(f"Waiting {random_delay} seconds to avoid detection...")
+        time.sleep(random_delay)
 
+    # Convertir les résultats au format DataFrame
+    df = pd.DataFrame(all_results)
 
-# Main execution
+    # Gestion des données manquantes
+    df.fillna("Data not available", inplace=True)
+
+    # Créer le dossier 'data' s'il n'existe pas
+    output_dir = r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Chemin complet pour le fichier CSV
+    csv_file_path = os.path.join(output_dir, "amazon_results.csv")
+
+    # Sauvegarder sous forme de fichier CSV
+    df.to_csv(csv_file_path, index=False, encoding='utf-8')
+    print(f"Data saved to {csv_file_path}")
+
+    return all_results
+
+# Script principal
 if __name__ == "__main__":
-    # URL of the Amazon search results page (customize it for your needs)
-    BASE_URL = "https://www.amazon.com/s?i=computers-intl-ship&srs=16225007011&rh=n%3A16225007011&s=popularity-rank&fs=true&ref=lp_16225007011_sar"
+    search_query = "computers"  # Requête de recherche
+    num_pages = 200  # Nombre de pages à scraper
 
-    # Scrape up to 5 pages of results
-    products = scrape_amazon(BASE_URL, max_pages=5)
+    # Scraper Amazon et sauvegarder les résultats
+    scraped_data = scrape_amazon(search_query, num_pages)
 
-    # Output the results
-    print(f"Total products scraped: {len(products)}")
-    for product in products:
+    # Afficher un aperçu des données
+    for product in scraped_data[:5]:  # Affiche les 5 premiers produits
         print(product)
