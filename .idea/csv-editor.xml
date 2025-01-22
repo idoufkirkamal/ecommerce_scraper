@@ -3,6 +3,20 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="\data\cleaned\aliexpress_cleaned.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\cleaned\amazon\amazon_results_cleaned_day1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\cleaned\amazon_cleaned.csv">
           <value>
             <Attribute>
@@ -10,7 +24,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\cleaned\amazon_results_cleaned_day1.csv">
+        <entry key="\data\cleaned\jumia_cleaned.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -24,42 +38,28 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\aliexpress_raw.csv">
+        <entry key="\data\processed\analysis_results.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\amazon_Computer_graphics_cards.csv">
+        <entry key="\data\processed\combined_data.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\amazon_raw.csv">
+        <entry key="\data\raw\amazon\amazon_smart_watch.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\amazon_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\laptop_day1_amazon.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\src\cleaning\cleaned_laptop_data.csv">
+        <entry key="\data\raw\amazon\monitor_amazon1.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
