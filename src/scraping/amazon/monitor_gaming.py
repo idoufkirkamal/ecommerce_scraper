@@ -122,7 +122,7 @@ def scrape_amazon(search_query, num_pages, output_dir=r"C:\Users\AdMin\Desktop\e
     df = pd.DataFrame(detailed_results)
     df.fillna("Data not available", inplace=True)
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "monitor_amazon1.csv")
+    output_path = os.path.join(output_dir, "monitor_amazon2.csv")
     df.to_csv(output_path, index=False, encoding='utf-8')
     print(f"Data saved to {output_path}")
 

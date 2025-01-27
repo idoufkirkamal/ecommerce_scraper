@@ -20,12 +20,10 @@ DEFAULT_HEADERS = {
 
 # Helper Functions
 def get_text_or_default(element, default="Data not available"):
-    """Extracts text from BeautifulSoup element or returns a default value."""
     return element.text.strip() if element else default
 
 
-def wait_random(min_time=5, max_time=15):
-    """Wait for a random number of seconds to avoid detection."""
+def wait_random(min_time=2, max_time=8):
     delay = random.randint(min_time, max_time)
     print(f"Waiting {delay} seconds...")
     time.sleep(delay)
@@ -124,7 +122,7 @@ def scrape_amazon(search_query, num_pages, output_dir="data/raw"):
     df = pd.DataFrame(detailed_results)
     df.fillna("Data not available", inplace=True)
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "laptop_day1_amazon.csv")
+    output_path = os.path.join(output_dir, "laptop_day2_amazon.csv")
     df.to_csv(output_path, index=False, encoding='utf-8')
     print(f"Data saved to {output_path}")
 

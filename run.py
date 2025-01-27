@@ -1,6 +1,6 @@
 from src.scraping.aliexpress_scraper import scrape_aliexpress
 from src.scraping.amazon.amazon_scraper_laptop import scrape_amazon
-from src.scraping.jumia_scraper import scrape_jumia
+from src.scraping.ebay.ebay_scraper import scrape_jumia
 from src.cleaning.clean_utils import clean_all_data
 from src.analysis.analyze_prices import analyze_prices
 
