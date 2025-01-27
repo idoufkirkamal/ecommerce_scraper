@@ -1,0 +1,73 @@
+2025-01-27 00:16:24,850 - INFO - Starting processing for category: Laptops
+2025-01-27 00:16:24,851 - INFO - Starting processing for category: Gaming Monitors
+2025-01-27 00:16:24,852 - INFO - Starting processing for category: Smart Watches
+2025-01-27 00:16:24,852 - INFO - Starting processing for category: Graphics Cards
+2025-01-27 00:16:24,852 - ERROR - Error in scrape_search_page | URL: 1 | Error: ClientSession.__init__() got an unexpected keyword argument 'session'
+Traceback (most recent call last):
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 54, in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 159, in scrape_search_page
+    html = await fetch_with_retry(session, base_url, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 74, in fetch_with_retry
+    async with RetryClient(session=session, retry_options=retry_options) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\.venv\Lib\site-packages\aiohttp_retry\client.py", line 203, in __init__
+    client = ClientSession(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ClientSession.__init__() got an unexpected keyword argument 'session'
+2025-01-27 00:16:24,855 - ERROR - Error in scrape_search_page | URL: 1 | Error: ClientSession.__init__() got an unexpected keyword argument 'session'
+Traceback (most recent call last):
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 54, in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 159, in scrape_search_page
+    html = await fetch_with_retry(session, base_url, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 74, in fetch_with_retry
+    async with RetryClient(session=session, retry_options=retry_options) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\.venv\Lib\site-packages\aiohttp_retry\client.py", line 203, in __init__
+    client = ClientSession(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ClientSession.__init__() got an unexpected keyword argument 'session'
+2025-01-27 00:16:24,856 - ERROR - Error in scrape_search_page | URL: 1 | Error: ClientSession.__init__() got an unexpected keyword argument 'session'
+Traceback (most recent call last):
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 54, in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 159, in scrape_search_page
+    html = await fetch_with_retry(session, base_url, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 74, in fetch_with_retry
+    async with RetryClient(session=session, retry_options=retry_options) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\.venv\Lib\site-packages\aiohttp_retry\client.py", line 203, in __init__
+    client = ClientSession(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ClientSession.__init__() got an unexpected keyword argument 'session'
+2025-01-27 00:16:24,857 - ERROR - Error in scrape_search_page | URL: 1 | Error: ClientSession.__init__() got an unexpected keyword argument 'session'
+Traceback (most recent call last):
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 54, in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 159, in scrape_search_page
+    html = await fetch_with_retry(session, base_url, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\src\scraping\ebay\ebay.py", line 74, in fetch_with_retry
+    async with RetryClient(session=session, retry_options=retry_options) as client:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AdMin\Desktop\ecommerce_scraper\.venv\Lib\site-packages\aiohttp_retry\client.py", line 203, in __init__
+    client = ClientSession(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ClientSession.__init__() got an unexpected keyword argument 'session'
+2025-01-27 00:16:24,857 - INFO - Found 0 unique URLs for Laptops
+2025-01-27 00:16:24,857 - INFO - Found 0 unique URLs for Gaming Monitors
+2025-01-27 00:16:24,858 - INFO - Found 0 unique URLs for Smart Watches
+2025-01-27 00:16:24,858 - INFO - Found 0 unique URLs for Graphics Cards
+2025-01-27 00:16:24,858 - WARNING - No data to save for Laptops
+2025-01-27 00:16:24,858 - WARNING - No data to save for Gaming Monitors
+2025-01-27 00:16:24,858 - WARNING - No data to save for Smart Watches
+2025-01-27 00:16:24,858 - WARNING - No data to save for Graphics Cards
+2025-01-27 00:16:24,860 - INFO - Scraping session ended
