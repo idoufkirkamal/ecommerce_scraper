@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime
+import re
 
 # Constants
 USER_AGENTS = [
@@ -21,6 +22,11 @@ DEFAULT_HEADERS = {
 def get_text_or_default(element, default="Data not available"):
     """Extracts text from BeautifulSoup element or returns a default value."""
     return element.text.strip() if element else default
+
+def extract_price(price_text):
+    """Extracts the numeric part of the price."""
+    match = re.search(r'\d[,\d]*', price_text)
+    return match.group() if match else "Price not available"
 
 def wait_random(min_time=3, max_time=7):
     """Wait for a random number of seconds to avoid detection."""
@@ -52,7 +58,8 @@ def scrape_flipkart_page(url):
 
             # Extract price
             price_element = product.find('div', class_='Nx9bqj _4b5DiR')
-            price = get_text_or_default(price_element)
+            price_raw = get_text_or_default(price_element)
+            price = extract_price(price_raw)
 
             # Extract rating
             rating_element = product.find('div', class_='XQDdHH')
