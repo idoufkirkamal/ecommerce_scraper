@@ -141,7 +141,7 @@ def scrape_flipkart_page(url):
         return []
 
 
-def scrape_flipkart(category_url, num_pages, category_name="laptops", scrape_number=1, output_dir="data/raw/flipkart"):
+def scrape_flipkart(category_url, num_pages, category_name="monitors", scrape_number=1, output_dir="data/raw/flipkart"):
     """
     Scrapes Flipkart products for a given category and saves the output with a dynamic filename.
     Args:
@@ -192,10 +192,10 @@ def scrape_flipkart(category_url, num_pages, category_name="laptops", scrape_num
 # Main script
 if __name__ == "__main__":
     # Define the category URL and scrape parameters
-    category_url = "https://www.flipkart.com/laptops/pr?sid=6bo,b5g&q=laptop&otracker=categorytree"
-    num_pages = 2  # Number of pages to scrape
+    category_url = "https://www.flipkart.com/search?q=monitor&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off"
+    num_pages = 1  # Number of pages to scrape
     scrape_number = 1  # Scrape number based on iteration
-    category_name = "laptops"  # Define the category name
+    category_name = "monitors"  # Define the category name
 
     # Perform the scraping
     scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
