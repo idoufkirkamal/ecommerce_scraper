@@ -38,69 +38,56 @@ def scrape_walmart_page(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Find the specific block containing the products
-        product_block = soup.find('div', {'class': 'flex flex-wrap w-100 flex-grow-0 flex-shrink-0 ph2 pr0-xl pl4-xl mt0-xl'})
+        # Find the product container
+        product_block = soup.find('div', {'data-testid': 'item-stack'})
         if not product_block:
             print("No product block found on this page.")
             return []
 
-        # Find all product items within the block
+        # Extract all products
         products = product_block.find_all('div', {'data-item-id': True})
         if not products:
             print("No products found in the block.")
             return []
 
-        collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         scraped_items = []
+        collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         for product in products:
             # Extract title
-            title = product.find('span', {'class': 'w_iUH7'})  # Updated selector
-            if not title:
-                title = product.find('span', {'data-automation-id': 'product-title'})  # Fallback selector
+            title = product.find('span', {'data-automation-id': 'product-title'})
+            title_text = get_text_or_default(title)
 
             # Extract price
-            price = product.find('div', {'data-automation-id': 'product-price'})
-            if price:
-                price_text = price.find('span', {'class': 'f2'})  # Current price
-                if not price_text:
-                    price_text = price.find('span', {'class': 'w_iUH7'})  # Fallback selector
+            price_container = product.find('div', {'data-automation-id': 'product-price'})
+            price_text = None
+            if price_container:
+                price_text = price_container.find('span', {'class': 'f2'})
+                price_text = get_text_or_default(price_text)
 
             # Extract rating
             rating = product.find('span', {'data-testid': 'product-ratings'})
-            if rating:
-                rating_value = rating.get('data-value', None)
-            else:
-                rating_value = None
+            rating_value = rating['data-value'] if rating else None
 
             # Extract number of reviews
-            review = product.find('span', {'data-testid': 'product-reviews'})
-            if review:
-                review_value = review.get('data-value', None)
-            else:
-                review_value = None
+            reviews = product.find('span', {'data-testid': 'product-reviews'})
+            reviews_value = reviews['data-value'] if reviews else None
 
             # Extract image URL
             image = product.find('img', {'data-testid': 'productTileImage'})
-            if image:
-                image_url = image.get('src', None)
-            else:
-                image_url = None
+            image_url = image['src'] if image else "Image not available"
 
             # Extract product URL
             product_link = product.find('a', {'data-automation-id': 'product-title'})
-            if product_link:
-                product_url = "https://www.walmart.com" + product_link['href']
-            else:
-                product_url = None
+            product_url = "https://www.walmart.com" + product_link['href'] if product_link else "URL not available"
 
             scraped_items.append({
-                "title": get_text_or_default(title),
-                "price": get_text_or_default(price_text),
+                "title": title_text,
+                "price": price_text,
                 "rating": rating_value,
-                "reviews": review_value,
-                "image_url": image_url if image_url else "Image not available",
-                "product_url": product_url if product_url else "URL not available",
+                "reviews": reviews_value,
+                "image_url": image_url,
+                "product_url": product_url,
                 "collection_date": collection_date
             })
 
@@ -110,31 +97,30 @@ def scrape_walmart_page(url):
         print(f"Error occurred while scraping {url}: {e}")
         return []
 
-
-# Scrape multiple Walmart pages
+# Update pagination handling
 def scrape_walmart(category_url, num_pages, output_dir="data/raw/walmart"):
-    base_url = category_url
     aggregated_results = []
-
     for page in range(1, num_pages + 1):
         print(f"Scraping page {page}...")
-        page_url = f"{base_url}&page={page}"
+        page_url = f"{category_url}&page={page}"
         page_results = scrape_walmart_page(page_url)
 
         if not page_results:
-            print("No more pages or an error occurred. Stopping.")
+            print("No more products found. Stopping.")
             break
 
         aggregated_results.extend(page_results)
         wait_random()
 
     # Save results to CSV
-    df = pd.DataFrame(aggregated_results)
-    df.fillna("Data not available", inplace=True)
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "walmart_laptops.csv")
-    df.to_csv(output_path, index=False, encoding='utf-8')
-    print(f"Data saved to {output_path}")
+    if aggregated_results:
+        df = pd.DataFrame(aggregated_results)
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, "walmart_laptops.csv")
+        df.to_csv(output_path, index=False, encoding='utf-8')
+        print(f"Data saved to {output_path}")
+    else:
+        print("No data scraped.")
 
     return aggregated_results
 
