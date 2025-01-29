@@ -10,7 +10,6 @@ import os
 # Initialize UserAgent for rotating headers
 ua = UserAgent()
 
-
 # Define headers with rotating User-Agent
 def get_headers():
     return {
@@ -20,10 +19,8 @@ def get_headers():
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
         'Referer': 'https://www.ebay.com/',
-
         'DNT': '1'
     }
-
 
 async def scrape_product_details(session, product_url, category):
     try:
@@ -34,10 +31,11 @@ async def scrape_product_details(session, product_url, category):
             response.raise_for_status()
             soup = BeautifulSoup(await response.text(), 'html.parser')
 
-            title = soup.find('h1', class_='x-item-title__mainTitle').text.strip() if soup.find('h1',
-                                                                                                class_='x-item-title__mainTitle') else 'N/A'
-            price = soup.find('div', class_='x-price-primary').text.strip() if soup.find('div',
-                                                                                         class_='x-price-primary') else 'N/A'
+            title = soup.find('h1', class_='x-item-title__mainTitle')
+            title = title.text.strip() if title else 'N/A'
+
+            price = soup.find('div', class_='x-price-primary')
+            price = price.text.strip() if price else 'N/A'
 
             specs = {}
             for spec in soup.find_all('div', class_='ux-labels-values__labels'):
@@ -46,7 +44,6 @@ async def scrape_product_details(session, product_url, category):
                 specs[key] = value
 
             product_details = {
-                'Category': category,
                 'Title': title,
                 'Price': price,
                 'Collection Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -58,7 +55,7 @@ async def scrape_product_details(session, product_url, category):
                     'CPU': specs.get('Processor', 'N/A'),
                     'Model': specs.get('Model', 'N/A'),
                     'Brand': specs.get('Brand', 'N/A'),
-                    'GPU': specs.get('Graphics Coprocessor', 'N/A'),
+                    'GPU': specs.get('GPU', 'N/A'),
                     'Screen Size': specs.get('Screen Size', 'N/A'),
                     'Storage': specs.get('SSD Capacity', 'N/A'),
                 })
@@ -97,17 +94,11 @@ async def scrape_product_details(session, product_url, category):
         print(f"Error scraping {product_url}: {str(e)}")
         return None
 
-
 async def scrape_search_page(session, query, page, semaphore, category):
     async with semaphore:
         try:
             base_url = "https://www.ebay.com/sch/i.html"
-            params = {
-                '_nkw': query,
-                '_sacat': 0,
-                '_from': 'R40',
-                '_pgn': page
-            }
+            params = {'_nkw': query, '_sacat': 0, '_from': 'R40', '_pgn': page}
 
             headers = get_headers()
             async with session.get(base_url, params=params, headers=headers) as response:
@@ -115,11 +106,7 @@ async def scrape_search_page(session, query, page, semaphore, category):
                 soup = BeautifulSoup(await response.text(), 'html.parser')
 
                 items = soup.find_all('div', class_='s-item__wrapper')
-                product_urls = [
-                    item.find('a', class_='s-item__link')['href']
-                    for item in items
-                    if item.find('a', class_='s-item__link')
-                ]
+                product_urls = [item.find('a', class_='s-item__link')['href'] for item in items if item.find('a', class_='s-item__link')]
 
                 print(f"Scraped page {page} for {category} ({len(product_urls)} products)")
                 return product_urls
@@ -128,7 +115,6 @@ async def scrape_search_page(session, query, page, semaphore, category):
             print(f"Error scraping page {page} for {category}: {str(e)}")
             return []
 
-
 async def scrape_ebay_search(categories, max_pages=1):
     all_products = {}
     semaphore = asyncio.Semaphore(2)
@@ -136,8 +122,7 @@ async def scrape_ebay_search(categories, max_pages=1):
     async with aiohttp.ClientSession() as session:
         for category, query in categories.items():
             print(f"\n{'=' * 30}\nStarting {category} scraping\n{'=' * 30}")
-            tasks = [scrape_search_page(session, query, page, semaphore, category)
-                     for page in range(1, max_pages + 1)]
+            tasks = [scrape_search_page(session, query, page, semaphore, category) for page in range(1, max_pages + 1)]
 
             search_results = await asyncio.gather(*tasks)
             product_urls = [url for sublist in search_results for url in sublist]
@@ -150,48 +135,59 @@ async def scrape_ebay_search(categories, max_pages=1):
 
     return all_products
 
+def save_to_csv(data, category, save_directory, fieldnames):
+    os.makedirs(save_directory, exist_ok=True)
 
-def save_to_csv(data, filename, fieldnames):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    # Format category name for filename
+    category_filename = category.lower().replace(' ', '_')
+    today_date = datetime.now().strftime('%Y_%m_%d')
+
+    # Get existing files that match the pattern
+    existing_files = [
+        f for f in os.listdir(save_directory) if f.startswith(f"{category_filename}_{today_date}")
+    ]
+
+    # Determine the next scrape number
+    scrape_numbers = [
+        int(f.split('_scrape')[1].split('.')[0]) for f in existing_files if '_scrape' in f
+    ]
+    next_scrape = max(scrape_numbers, default=0) + 1  # Start from 1 if no files exist
+
+    # Generate filename
+    filename = os.path.join(save_directory, f"{category_filename}_{today_date}_scrape{next_scrape}.csv")
+
+    # Save data to CSV
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data)
 
+    print(f"Saved {len(data)} {category} items to {filename}")
 
 async def main():
     categories = {
-        "Laptops": "laptop mac",
+        "Laptops": "laptop",
         "Gaming Monitors": "gaming monitor",
         "Smart Watches": "smart watch",
         "Graphics Cards": "graphics card"
     }
 
-    max_pages = 19
-    save_directory = r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw"
+    max_pages = 18
+    save_directory = "data/raw/ebay"
 
     print("\nStarting eBay scraping...")
     all_products = await scrape_ebay_search(categories, max_pages)
 
     category_fields = {
-        "Laptops": ['Category', 'Title', 'Price', 'RAM', 'CPU', 'Model',
-                    'Brand', 'GPU', 'Screen Size', 'Storage', 'Collection Date'],
-        "Gaming Monitors": ['Category', 'Title', 'Price', 'Screen Size', 'Maximum Resolution',
-                            'Aspect Ratio', 'Refresh Rate', 'Response Time', 'Brand', 'Model', 'Collection Date'],
-        "Smart Watches": ['Category', 'Title', 'Price', 'Case Size', 'Battery Capacity',
-                          'Brand', 'Model', 'Operating System', 'Storage Capacity', 'Collection Date'],
-        "Graphics Cards": ['Category', 'Title', 'Price', 'Brand', 'Memory Size',
-                           'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
+        "Laptops": ['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage', 'Collection Date'],
+        "Gaming Monitors": ['Title', 'Price', 'Screen Size', 'Maximum Resolution', 'Aspect Ratio', 'Refresh Rate', 'Response Time', 'Brand', 'Model', 'Collection Date'],
+        "Smart Watches": ['Title', 'Price', 'Case Size', 'Battery Capacity', 'Brand', 'Model', 'Operating System', 'Storage Capacity', 'Collection Date'],
+        "Graphics Cards": ['Title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
     }
 
     for category, products in all_products.items():
-        if not products:
-            continue
-
-        save_filename = os.path.join(save_directory, f"{category.lower().replace(' ', '_')}_results.csv")
-        save_to_csv(products, save_filename, category_fields[category])
-        print(f"Saved {len(products)} {category} items to {save_filename}")
-
+        if products:
+            save_to_csv(products, category, save_directory, category_fields[category])
 
 if __name__ == "__main__":
     asyncio.run(main())
