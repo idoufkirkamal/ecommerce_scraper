@@ -29,20 +29,17 @@ def wait_random(min_time=3, max_time=7):
     print(f"Waiting {delay} seconds...")
     time.sleep(delay)
 
-# Updated Helper Function for extracting specifications
 def extract_specifications(soup):
     """Extracts specifications from the product details section."""
     specifications = {}
     spec_sections = soup.find_all('div', class_='GNDEQ-')
     
     for section in spec_sections:
-        # Get the section title (e.g., "General", "Processor And Memory Features")
         section_title = section.find('div', class_='_4BJ2V+')
         if not section_title:
             continue
         section_title = section_title.text.strip()
 
-        # Extract the specifications in the table under this section
         spec_rows = section.find_all('tr', class_='WJdYP6 row')
         for row in spec_rows:
             key_element = row.find('td', class_='+fFi1w col col-3-12')
@@ -55,7 +52,6 @@ def extract_specifications(soup):
 
     return specifications
 
-# Updated function to scrape details from a single product
 def scrape_flipkart_product(product_url):
     """Scrapes detailed information (including ratings and reviews) for a single product."""
     headers = DEFAULT_HEADERS
@@ -64,32 +60,27 @@ def scrape_flipkart_product(product_url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Extract specifications
         specifications = extract_specifications(soup)
 
-        # Extract rating
-        rating_element = soup.find('div', class_='_3LWZlK')  # Update with the correct class for the rating
+        rating_element = soup.find('div', class_='_3LWZlK')
         rating = get_text_or_default(rating_element)
 
-        # Extract number of reviews
-        reviews_element = soup.find('span', class_='_2_R_DZ')  # Update with the correct class for reviews
+        reviews_element = soup.find('span', class_='_2_R_DZ')
         reviews_text = get_text_or_default(reviews_element)
 
-        # Extract numeric value for reviews if needed
         reviews_match = re.search(r'\d+', reviews_text.replace(',', ''))
         reviews = reviews_match.group() if reviews_match else "Data not available"
 
         return {
             "rating": rating,
             "reviews": reviews,
-            **specifications,  # Include specifications
+            **specifications,
         }
 
     except requests.exceptions.RequestException as e:
         print(f"Error occurred while scraping product {product_url}: {e}")
         return {"rating": "Data not available", "reviews": "Data not available"}
 
-# Update scrape_flipkart_page to include detailed specifications
 def scrape_flipkart_page(url):
     headers = DEFAULT_HEADERS
     try:
@@ -97,7 +88,6 @@ def scrape_flipkart_page(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Find the product container
         product_blocks = soup.find_all('div', class_='cPHDOP col-12-12')
         if not product_blocks:
             print("No product blocks found on this page.")
@@ -107,31 +97,24 @@ def scrape_flipkart_page(url):
         collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         for product in product_blocks:
-            # Extract title
             title_element = product.find('a', class_='WKTcLC')
             title = get_text_or_default(title_element)
 
-            # Extract price
             price_element = product.find('div', class_='Nx9bqj')
             price = get_text_or_default(price_element)
 
-            # Extract rating
             rating_element = product.find('div', class_='XQDdHH')
             rating = get_text_or_default(rating_element)
 
-            # Extract number of reviews
             reviews_element = product.find('span', class_='Wphh3N')
             reviews = get_text_or_default(reviews_element)
 
-            # Extract image URL
             image_element = product.find('img', class_='_53J4C-')
             image_url = image_element['src'] if image_element else "Image not available"
 
-            # Extract product URL
             link_element = product.find('a', class_='rPDeLR')
             product_url = f"https://www.flipkart.com{link_element['href']}" if link_element else "URL not available"
 
-            # Extract product specifications
             specifications = scrape_flipkart_product(product_url) if product_url != "URL not available" else {}
 
             scraped_items.append({
@@ -142,7 +125,7 @@ def scrape_flipkart_page(url):
                 "image_url": image_url,
                 "product_url": product_url,
                 "collection_date": collection_date,
-                **specifications,  # Merge specifications into the product data
+                **specifications,
             })
 
         return scraped_items
@@ -151,15 +134,26 @@ def scrape_flipkart_page(url):
         print(f"Error occurred while scraping {url}: {e}")
         return []
 
+def get_next_scrape_number(category_name, formatted_date, output_dir):
+    """Returns the next scrape number based on existing files in the directory."""
+    files = os.listdir(output_dir)
+    pattern = re.compile(rf"{category_name}_{formatted_date}_scrape(\d+)\.csv")
+    scrape_numbers = []
 
-def scrape_flipkart(category_url, num_pages, category_name="smartwatches", scrape_number=1, output_dir="data/raw/flipkart"):
+    for file in files:
+        match = pattern.match(file)
+        if match:
+            scrape_numbers.append(int(match.group(1)))
+
+    return max(scrape_numbers, default=0) + 1
+
+def scrape_flipkart(category_url, num_pages, category_name="smartwatches", output_dir="data/raw/flipkart"):
     """
     Scrapes Flipkart products for a given category and saves the output with a dynamic filename.
     Args:
         category_url (str): URL of the category to scrape.
         num_pages (int): Number of pages to scrape.
         category_name (str): Name of the category being scraped.
-        scrape_number (int): The scrape iteration number (e.g., 1, 2, 3, 4 for the month).
         output_dir (str): Directory to save the scraped data.
     """
     aggregated_results = []
@@ -175,22 +169,18 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", scrap
         aggregated_results.extend(page_results)
         wait_random()
 
-    # Save results to CSV
     if aggregated_results:
-        # Get today's date in the desired format
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
-        # Create a dynamic filename based on category, date, and scrape iteration
+        scrape_number = get_next_scrape_number(category_name, formatted_date, output_dir)
+
         filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
 
-        # Create the output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
-        # Full path for the output file
         output_path = os.path.join(output_dir, filename)
 
-        # Save the data to a CSV file
         df = pd.DataFrame(aggregated_results)
         df.to_csv(output_path, index=False, encoding='utf-8-sig')
         print(f"Data saved to {output_path}")
@@ -199,14 +189,10 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", scrap
 
     return aggregated_results
 
-
 # Main script
 if __name__ == "__main__":
-    # Define the category URL and scrape parameters
     category_url = "https://www.flipkart.com/wearable-smart-devices/smart-watches/pr?sid=ajy,buh&q=smart+watches&otracker=categorytree"
-    num_pages = 18  # Number of pages to scrape
-    scrape_number = 1  # Scrape number based on iteration
-    category_name = "smart_watches"  # Define the category name
+    num_pages = 18
+    category_name = "smart_watches"
 
-    # Perform the scraping
-    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
+    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name)

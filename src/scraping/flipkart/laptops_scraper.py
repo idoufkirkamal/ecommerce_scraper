@@ -135,14 +135,13 @@ def scrape_flipkart_page(url):
         return []
 
 
-def scrape_flipkart(category_url, num_pages, category_name="laptops", scrape_number=1, output_dir="data/raw/flipkart"):
+def scrape_flipkart(category_url, num_pages, category_name="laptops", output_dir="data/raw/flipkart"):
     """
     Scrapes Flipkart products for a given category and saves the output with a dynamic filename.
     Args:
         category_url (str): URL of the category to scrape.
         num_pages (int): Number of pages to scrape.
         category_name (str): Name of the category being scraped.
-        scrape_number (int): The scrape iteration number (e.g., 1, 2, 3, 4 for the month).
         output_dir (str): Directory to save the scraped data.
     """
     aggregated_results = []
@@ -164,14 +163,19 @@ def scrape_flipkart(category_url, num_pages, category_name="laptops", scrape_num
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
-        # Create a dynamic filename based on category, date, and scrape iteration
+        # Initialize scrape_number
+        scrape_number = 1
         filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
 
         # Create the output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
-        # Full path for the output file
+        # Check if the file already exists and increment the scrape_number if it does
         output_path = os.path.join(output_dir, filename)
+        while os.path.exists(output_path):
+            scrape_number += 1
+            filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
+            output_path = os.path.join(output_dir, filename)
 
         # Save the data to a CSV file
         df = pd.DataFrame(aggregated_results)
@@ -188,8 +192,7 @@ if __name__ == "__main__":
     # Define the category URL and scrape parameters
     category_url = "https://www.flipkart.com/laptops/pr?sid=6bo,b5g&q=laptop&otracker=categorytree"
     num_pages = 18  # Number of pages to scrape
-    scrape_number = 2  # Scrape number based on iteration
     category_name = "laptops"  # Define the category name
 
     # Perform the scraping
-    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
+    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name)
