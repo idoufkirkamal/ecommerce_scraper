@@ -189,7 +189,7 @@ if __name__ == "__main__":
     category_url = "https://www.flipkart.com/laptops/pr?sid=6bo,b5g&q=laptop&otracker=categorytree"
     num_pages = 18  # Number of pages to scrape
     scrape_number = 2  # Scrape number based on iteration
-    category_name = "laptops"  # Define the category name
+    category_name = "laptops mac"  # Define the category name
 
     # Perform the scraping
     scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
