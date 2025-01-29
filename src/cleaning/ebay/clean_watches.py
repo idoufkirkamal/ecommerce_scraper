@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 
 def clean_watches():
     # Load data
-    df = pd.read_csv('../../../data/raw/ebay/smart_watches_results.csv')
+    df = pd.read_csv('../../../data/raw/ebay/smart_watches_2025-01-26.csv')
 
     # ---- Price Cleaning ----
     df['Price'] = pd.to_numeric(df['Price'].str.replace(r'[^\d.]', '', regex=True), errors='coerce')

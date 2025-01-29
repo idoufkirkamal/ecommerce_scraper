@@ -59,13 +59,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\amazon\amazon_raw.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\raw\amazon\amazon_smart_watch.csv">
           <value>
             <Attribute>
@@ -94,91 +87,28 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\ebay\cleaned_gaming_monitors.csv">
+        <entry key="\data\raw\ebay\gaming_monitors_2025-01-26.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\ebay\cleaned_graphics_cards.csv">
+        <entry key="\data\raw\ebay\graphics_cards_2025-01-28.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\ebay\cleaned_graphics_cards_advanced.csv">
+        <entry key="\data\raw\ebay\laptops_2025-01-28.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\raw\ebay\cleaned_laptops_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\ebay\gaming_monitors_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\ebay\graphics_cards_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\ebay\laptops_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\ebay\smart_watches_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\gaming_monitors_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\raw\smart_watches_results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\src\scraping\amazon\data\amazon_gpu_products.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\src\scraping\amazon\data\amazon_graphics_cards.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\src\scraping\amazon\data\raw\laptop_day2_amazon.csv">
+        <entry key="\data\raw\ebay\smart_watches_2025-01-28.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

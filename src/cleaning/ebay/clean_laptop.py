@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 # Définir le chemin du fichier
-file_path = r"/data/raw/ebay/laptops_results.csv"
+file_path = r"/data/raw/ebay/laptops_2025-01-26.csv"
 
 # Vérifier si le fichier existe
 if not os.path.exists(file_path):

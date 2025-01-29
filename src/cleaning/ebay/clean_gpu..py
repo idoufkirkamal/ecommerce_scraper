@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore')
 
 def clean_gpu():
     # Chargement des données
-    df = pd.read_csv('../../../data/raw/ebay/graphics_cards_results.csv')
+    df = pd.read_csv('../../../data/raw/ebay/graphics_cards_2025-01-26.csv')
 
     # 1. Nettoyage du prix
     def extract_numeric_price(price):

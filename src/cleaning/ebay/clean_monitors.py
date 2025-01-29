@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 def clean_monitors():
     # Load data
-    df = pd.read_csv('../../../data/raw/ebay/gaming_monitors_results.csv')
+    df = pd.read_csv('../../../data/raw/ebay/gaming_monitors_2025-01-26.csv')
 
     # Improved currency conversion helper (previous fix)
     def convert_price(price):
