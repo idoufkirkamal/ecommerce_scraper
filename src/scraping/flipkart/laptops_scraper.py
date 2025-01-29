@@ -23,11 +23,6 @@ def get_text_or_default(element, default="Data not available"):
     """Extracts text from BeautifulSoup element or returns a default value."""
     return element.text.strip() if element else default
 
-def extract_price(price_text):
-    """Extracts the numeric part of the price."""
-    match = re.search(r'\d[,\d]*', price_text)
-    return match.group() if match else "Price not available"
-
 def wait_random(min_time=3, max_time=7):
     """Wait for a random number of seconds to avoid detection."""
     delay = random.randint(min_time, max_time)
@@ -101,8 +96,7 @@ def scrape_flipkart_page(url):
 
             # Extract price
             price_element = product.find('div', class_='Nx9bqj _4b5DiR')
-            price_raw = get_text_or_default(price_element)
-            price = extract_price(price_raw)
+            price = get_text_or_default(price_element)
 
             # Extract rating
             rating_element = product.find('div', class_='XQDdHH')
@@ -181,7 +175,7 @@ def scrape_flipkart(category_url, num_pages, category_name="laptops", scrape_num
 
         # Save the data to a CSV file
         df = pd.DataFrame(aggregated_results)
-        df.to_csv(output_path, index=False, encoding='utf-8')
+        df.to_csv(output_path, index=False, encoding='utf-8-sig')
         print(f"Data saved to {output_path}")
     else:
         print("No data scraped.")
@@ -193,13 +187,9 @@ def scrape_flipkart(category_url, num_pages, category_name="laptops", scrape_num
 if __name__ == "__main__":
     # Define the category URL and scrape parameters
     category_url = "https://www.flipkart.com/laptops/pr?sid=6bo,b5g&q=laptop&otracker=categorytree"
-    num_pages = 5  # Number of pages to scrape
-    scrape_number = 1  # Scrape number based on iteration
+    num_pages = 18  # Number of pages to scrape
+    scrape_number = 2  # Scrape number based on iteration
     category_name = "laptops"  # Define the category name
 
     # Perform the scraping
     scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
-
-    # Print a preview of the scraped data
-    for product in scraped_data[:5]:
-        print(product)

@@ -108,7 +108,7 @@ def scrape_flipkart_page(url):
 
         for product in product_blocks:
             # Extract title
-            title_element = product.find('a', class_='WKTcLC')
+            title_element = product.find('a', class_='wjcEIp')
             title = get_text_or_default(title_element)
 
             # Extract price
@@ -124,11 +124,11 @@ def scrape_flipkart_page(url):
             reviews = get_text_or_default(reviews_element)
 
             # Extract image URL
-            image_element = product.find('img', class_='_53J4C-')
+            image_element = product.find('img', class_='DByuf4')
             image_url = image_element['src'] if image_element else "Image not available"
 
             # Extract product URL
-            link_element = product.find('a', class_='rPDeLR')
+            link_element = product.find('a', class_='VJA3rP')
             product_url = f"https://www.flipkart.com{link_element['href']}" if link_element else "URL not available"
 
             # Extract product specifications
@@ -203,10 +203,10 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", scrap
 # Main script
 if __name__ == "__main__":
     # Define the category URL and scrape parameters
-    category_url = "https://www.flipkart.com/wearable-smart-devices/smart-watches/pr?sid=ajy,buh&q=smart+watches&otracker=categorytree"
+    category_url = "https://www.flipkart.com/gaming-components/graphic-cards/pr?sid=4rr,tin,6zn&q=graphics+card&otracker=categorytree"
     num_pages = 18  # Number of pages to scrape
     scrape_number = 1  # Scrape number based on iteration
-    category_name = "smart_watches"  # Define the category name
+    category_name = "graphics_cards"  # Define the category name
 
     # Perform the scraping
     scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
