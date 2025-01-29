@@ -5,27 +5,17 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Constants
 USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Gecko/20100101 Firefox/113.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
 ]
-
-
-def get_random_headers():
-    return {
-        'User-Agent': random.choice(USER_AGENTS),
-        'Accept-Language': 'en-US, en;q=0.5',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Referer': 'https://www.amazon.com/',
-        'DNT': '1'
-    }
+DEFAULT_HEADERS = {
+    'User-Agent': random.choice(USER_AGENTS),
+    'Accept-Language': 'en-US, en;q=0.5'
+}
 
 
 # Helper Functions
@@ -34,125 +24,115 @@ def get_text_or_default(element, default="Data not available"):
 
 
 def wait_random(min_time=2, max_time=8):
-    delay = random.uniform(min_time, max_time)
-    print(f"Waiting {delay:.2f} seconds...")
+    delay = random.randint(min_time, max_time)
+    print(f"Waiting {delay} seconds...")
     time.sleep(delay)
 
 
-# Scrape a single Amazon page with retries
+# Scrape a single Amazon page
 def scrape_amazon_page(url):
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, headers=get_random_headers(), timeout=15)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+    headers = DEFAULT_HEADERS
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-            # Check for CAPTCHA
-            if soup.find('form', {'action': '/errors/validateCaptcha'}):
-                raise requests.exceptions.RequestException("CAPTCHA encountered")
+        results = soup.find_all('div', {'data-component-type': 's-search-result'})
+        if not results:
+            print("No results found on this page.")
+            return []
 
-            results = soup.find_all('div', {'data-component-type': 's-search-result'})
-            if not results:
-                return []
+        collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        scraped_items = []
 
-            collection_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            return [{
+        for item in results:
+            scraped_items.append({
                 "title": get_text_or_default(item.select_one('.a-size-medium.a-color-base.a-text-normal')),
                 "price": get_text_or_default(item.select_one('.a-price .a-offscreen')),
                 "promo": get_text_or_default(item.select_one(
                     '.a-row.a-size-base.a-color-secondary.s-align-children-center span.a-color-base.a-text-bold'),
                     "No promotion"),
                 "coupon": get_text_or_default(item.select_one('.s-coupon-clipped .a-color-base'), "No coupon"),
-                "product_url": "https://www.amazon.com" + link['href'] if (
-                    link := item.select_one('.a-link-normal.s-no-outline')) else "URL not available",
+                "product_url": "https://www.amazon.com" + item.select_one('.a-link-normal.s-no-outline')[
+                    'href'] if item.select_one('.a-link-normal.s-no-outline') else "URL not available",
                 "collection_date": collection_date
-            } for item in results]
+            })
 
-        except requests.exceptions.RequestException as e:
-            print(f"Attempt {attempt + 1} failed for {url}: {str(e)}")
-            if attempt < max_retries - 1:
-                backoff = (attempt + 1) * 5
-                print(f"Retrying in {backoff} seconds...")
-                time.sleep(backoff)
-            else:
-                print(f"Max retries exceeded for {url}")
-                return []
-    return []
+        return scraped_items
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred while scraping {url}: {e}")
+        return []
 
 
-# Scrape product details with retries
+# Scrape product details page
 def scrape_product_details(url):
-    max_retries = 2
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, headers=get_random_headers(), timeout=10)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+    headers = DEFAULT_HEADERS
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-            return {
-                "brand": get_text_or_default(soup.select_one('.po-brand .a-span9')),
-                "model_name": get_text_or_default(soup.select_one('.po-model_name .a-span9')),
-                "screen_size": get_text_or_default(soup.select_one('.po-display\\.size .a-span9')),
-                "color": get_text_or_default(soup.select_one('.po-color .a-span9')),
-                "hard_disk_size": get_text_or_default(soup.select_one('.po-hard_disk\\.size .a-span9')),
-                "cpu_model": get_text_or_default(soup.select_one('.po-cpu_model\\.family .a-span9')),
-                "ram_memory": get_text_or_default(soup.select_one('.po-ram_memory\\.installed_size .a-span9')),
-                "operating_system": get_text_or_default(soup.select_one('.po-operating_system .a-span9')),
-                "special_feature": get_text_or_default(soup.select_one('.po-special_feature .a-span9')),
-            }
+        product_details = {
+            "brand": get_text_or_default(soup.select_one('.po-brand .a-span9')),
+            "model_name": get_text_or_default(soup.select_one('.po-model_name .a-span9')),
+            "screen_size": get_text_or_default(soup.select_one('.po-display\\.size .a-span9')),
+            "color": get_text_or_default(soup.select_one('.po-color .a-span9')),
+            "hard_disk_size": get_text_or_default(soup.select_one('.po-hard_disk\\.size .a-span9')),
+            "cpu_model": get_text_or_default(soup.select_one('.po-cpu_model\\.family .a-span9')),
+            "ram_memory": get_text_or_default(soup.select_one('.po-ram_memory\\.installed_size .a-span9')),
+            "operating_system": get_text_or_default(soup.select_one('.po-operating_system .a-span9')),
+            "special_feature": get_text_or_default(soup.select_one('.po-special_feature .a-span9')),
+        }
 
-        except requests.exceptions.RequestException as e:
-            print(f"Attempt {attempt + 1} failed for {url}: {str(e)}")
-            if attempt < max_retries - 1:
-                time.sleep((attempt + 1) * 3)
-    return {}
+        return product_details
 
-
-# Parallel product detail scraping
-def process_product_details(product):
-    if product["product_url"].startswith("https://"):
-        details = scrape_product_details(product["product_url"])
-        product.update(details)
-        wait_random(2, 5)  # Shorter delay between detail requests
-    return product
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred while scraping {url}: {e}")
+        return {}
 
 
-# Improved main scraping function
-def scrape_amazon(search_query, num_pages, output_dir=r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\amazon"):
+# Scrape multiple Amazon pages
+def scrape_amazon(search_query, num_pages, output_dir="data/raw"):
     base_url = f"https://www.amazon.com/s?k={search_query.replace(' ', '+')}&page="
     aggregated_results = []
 
     for page in range(1, num_pages + 1):
+        print(f"Scraping page {page}...")
         page_url = f"{base_url}{page}"
-        print(f"Scraping {page_url}")
-
         page_results = scrape_amazon_page(page_url)
+
         if not page_results:
-            print(f"Stopped at page {page}")
+            print("No more pages or an error occurred. Stopping.")
             break
 
         aggregated_results.extend(page_results)
-        if page < num_pages:
-            wait_random(3, 6)  # Longer delay between page requests
+        wait_random()
 
-    # Parallel processing of product details
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        futures = [executor.submit(process_product_details, p) for p in aggregated_results]
-        detailed_results = [future.result() for future in as_completed(futures)]
+    detailed_results = []
+    for product in aggregated_results:
+        if product["product_url"] != "URL not available":
+            print(f"Scraping details for {product['title']}...")
+            details = scrape_product_details(product["product_url"])
+            product.update(details)
+            wait_random()
+        detailed_results.append(product)
 
-    # Save results
+    # Save results to CSV
     df = pd.DataFrame(detailed_results)
     df.fillna("Data not available", inplace=True)
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "laptop_day2_2024.csv")
+    output_path = os.path.join(output_dir, "laptop_day2_amazon.csv")
     df.to_csv(output_path, index=False, encoding='utf-8')
     print(f"Data saved to {output_path}")
+
     return detailed_results
-
-
-# Main execution
+# Main script
 if __name__ == "__main__":
-    scraped_data = scrape_amazon("laptop Mac", num_pages=15)
+    search_query = "laptop Mac"
+    num_pages = 20
+
+    scraped_data = scrape_amazon(search_query, num_pages)
+
     for product in scraped_data[:5]:
         print(product)

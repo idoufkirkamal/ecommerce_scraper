@@ -2,11 +2,12 @@ import os
 import time
 import random
 from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-# Constants
+# Constantes 
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -21,44 +22,43 @@ CSV_COLUMNS = [
     "special_feature", "battery_capacity", "connectivity_technology",
     "wireless_communication_standard", "battery_cell_composition", "gps", "shape"
 ]
-DEFAULT_CSV_PATH = r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\amazon/amazon_smart_watch2.csv"
+DEFAULT_CSV_PATH = r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\amazon/amazon_smart_watch.csv"
 COLLECTION_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-# Helper Functions
+# Fonctions auxiliaires
 def get_text_or_default(element, default="Data not available"):
-    """Extract text from an element or return a default value."""
+    """Extrait le texte d'un élément ou retourne une valeur par défaut."""
     return element.text.strip() if element else default
 
 
 def wait_random(min_time=5, max_time=15):
-    """Wait for a random amount of time to avoid detection."""
-    delay = random.uniform(min_time, max_time)
-    print(f"Waiting for {delay:.2f} seconds...")
+    """Attend un temps aléatoire pour éviter la détection."""
+    delay = random.randint(min_time, max_time)
+    print(f"Attente de {delay} secondes...")
     time.sleep(delay)
 
 
 def save_results_to_csv(data, output_path=DEFAULT_CSV_PATH):
-    """Serialize results into a CSV file."""
+    """Sérialise les résultats dans un fichier CSV."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df = pd.DataFrame(data)
     df.fillna("Data not available", inplace=True)
     df.to_csv(output_path, index=False, encoding="utf-8")
-    print(f"Data saved to {output_path}")
+    print(f"Données sauvegardées dans {output_path}")
 
 
-# Scrape an Amazon page
-def scrape_amazon_page(url, session):
+# Scraper une page Amazon
+def scrape_amazon_page(url):
     try:
-        # Rotate headers for each request
-        DEFAULT_HEADERS['User-Agent'] = random.choice(USER_AGENTS)
-        response = session.get(url, headers=DEFAULT_HEADERS, timeout=10)
+        response = requests.get(url, headers=DEFAULT_HEADERS, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
         results = soup.find_all('div', {'data-component-type': 's-search-result'})
         if not results:
-            print("No results found on this page.")
+            print("Aucun résultat sur cette page.")
             return []
+
         collection_date = datetime.now().strftime(COLLECTION_DATE_FORMAT)
         return [
             {
@@ -79,16 +79,14 @@ def scrape_amazon_page(url, session):
             for item in results
         ]
     except requests.exceptions.RequestException as e:
-        print(f"Error scraping {url}: {e}")
+        print(f"Erreur lors du scraping de {url}: {e}")
         return []
 
 
-# Scrape product details
-def scrape_product_details(url, session):
+# Scraper les détails des produits
+def scrape_product_details(url):
     try:
-        # Rotate headers for each request
-        DEFAULT_HEADERS['User-Agent'] = random.choice(USER_AGENTS)
-        response = session.get(url, headers=DEFAULT_HEADERS, timeout=10)
+        response = requests.get(url, headers=DEFAULT_HEADERS, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         return {
@@ -102,22 +100,20 @@ def scrape_product_details(url, session):
             "shape": get_text_or_default(soup.select_one('.po-item_shape .a-span9')),
         }
     except requests.exceptions.RequestException as e:
-        print(f"Error scraping details of {url}: {e}")
+        print(f"Erreur lors du scraping des détails de {url}: {e}")
         return {}
 
 
-# Scrape multiple Amazon pages
+# Scraper plusieurs pages Amazon
 def scrape_amazon(search_query, num_pages, output_path=DEFAULT_CSV_PATH):
     base_url = f"https://www.amazon.com/s?k={search_query.replace(' ', '+')}&page="
     aggregated_results = []
-    session = requests.Session()  # Use session for better performance and cookie persistence
-
     for page in range(1, num_pages + 1):
-        print(f"Scraping page {page}...")
+        print(f"Scraping de la page {page}...")
         page_url = f"{base_url}{page}"
-        page_results = scrape_amazon_page(page_url, session)
+        page_results = scrape_amazon_page(page_url)
         if not page_results:
-            print("No more pages available. Stopping.")
+            print("Pas d'autres pages disponibles. Arrêt.")
             break
         aggregated_results.extend(page_results)
         wait_random()
@@ -125,8 +121,8 @@ def scrape_amazon(search_query, num_pages, output_path=DEFAULT_CSV_PATH):
     detailed_results = []
     for product in aggregated_results:
         if product["product_url"] != "URL not available":
-            print(f"Scraping details for {product['title']}...")
-            details = scrape_product_details(product["product_url"], session)
+            print(f"Scraping des détails pour {product['title']}...")
+            details = scrape_product_details(product["product_url"])
             product.update(details)
             wait_random()
         detailed_results.append(product)
@@ -135,10 +131,10 @@ def scrape_amazon(search_query, num_pages, output_path=DEFAULT_CSV_PATH):
     return detailed_results
 
 
-# Main Script
+# Script principal
 if __name__ == "__main__":
     search_query = "smart watch"
-    num_pages = 15
+    num_pages = 10
     scraped_data = scrape_amazon(search_query, num_pages)
     for product in scraped_data[:5]:
         print(product)

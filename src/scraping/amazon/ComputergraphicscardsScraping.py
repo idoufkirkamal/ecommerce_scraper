@@ -3,7 +3,7 @@ import random
 import re
 import requests
 from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 import pandas as pd
 import os
@@ -261,7 +261,7 @@ def scrape_amazon(search_query, num_pages):
     # Create DataFrame and save
     df = pd.DataFrame(all_results).replace({'N/A': None, '': None})
     os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
-    output_path = os.path.join(BASE_OUTPUT_DIR, "amazon_gpu_products2.csv")
+    output_path = os.path.join(BASE_OUTPUT_DIR, "amazon_gpu_products.csv")
     df.to_csv(output_path, index=False, encoding='utf-8-sig')
 
     print(f"Successfully saved {len(df)} products to {output_path}")
@@ -269,6 +269,6 @@ def scrape_amazon(search_query, num_pages):
 
 
 if __name__ == "__main__":
-    scraped_data = scrape_amazon("Computer graphics cards", 20)
+    scraped_data = scrape_amazon("Computer graphics cards", 1)
     print("\nSample results:")
     print(scraped_data[['title', 'price', 'brand']].head().to_string(index=False))
