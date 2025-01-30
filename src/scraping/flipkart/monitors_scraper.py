@@ -196,6 +196,23 @@ def scrape_flipkart(category_url, num_pages, category_name="monitors", output_di
     return aggregated_results
 
 
+def get_next_scrape_number(category_name, formatted_date, output_dir):
+    """Returns the next scrape number based on existing files in the directory."""
+    # List all files in the directory
+    files = os.listdir(output_dir)
+    pattern = re.compile(rf"{category_name}_{formatted_date}_scrape(\d+)\.csv")
+    scrape_numbers = []
+
+    # Find all matching files and extract scrape numbers
+    for file in files:
+        match = pattern.match(file)
+        if match:
+            scrape_numbers.append(int(match.group(1)))
+
+    # Return the next scrape number
+    return max(scrape_numbers, default=0) + 1
+
+
 # Main script
 if __name__ == "__main__":
     # Define the category URL and scrape parameters

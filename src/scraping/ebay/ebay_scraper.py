@@ -36,6 +36,11 @@ async def scrape_product_details(session, product_url, category):
 
             price = soup.find('div', class_='x-price-primary')
             price = price.text.strip() if price else 'N/A'
+            title = soup.find('h1', class_='x-item-title__mainTitle')
+            title = title.text.strip() if title else 'N/A'
+
+            price = soup.find('div', class_='x-price-primary')
+            price = price.text.strip() if price else 'N/A'
 
             specs = {}
             for spec in soup.find_all('div', class_='ux-labels-values__labels'):
@@ -55,6 +60,7 @@ async def scrape_product_details(session, product_url, category):
                     'CPU': specs.get('Processor', 'N/A'),
                     'Model': specs.get('Model', 'N/A'),
                     'Brand': specs.get('Brand', 'N/A'),
+                    'GPU': specs.get('GPU', 'N/A'),
                     'GPU': specs.get('GPU', 'N/A'),
                     'Screen Size': specs.get('Screen Size', 'N/A'),
                     'Storage': specs.get('SSD Capacity', 'N/A'),
@@ -99,6 +105,7 @@ async def scrape_search_page(session, query, page, semaphore, category):
         try:
             base_url = "https://www.ebay.com/sch/i.html"
             params = {'_nkw': query, '_sacat': 0, '_from': 'R40', '_pgn': page}
+            params = {'_nkw': query, '_sacat': 0, '_from': 'R40', '_pgn': page}
 
             headers = get_headers()
             async with session.get(base_url, params=params, headers=headers) as response:
@@ -106,6 +113,7 @@ async def scrape_search_page(session, query, page, semaphore, category):
                 soup = BeautifulSoup(await response.text(), 'html.parser')
 
                 items = soup.find_all('div', class_='s-item__wrapper')
+                product_urls = [item.find('a', class_='s-item__link')['href'] for item in items if item.find('a', class_='s-item__link')]
                 product_urls = [item.find('a', class_='s-item__link')['href'] for item in items if item.find('a', class_='s-item__link')]
 
                 print(f"Scraped page {page} for {category} ({len(product_urls)} products)")
@@ -122,6 +130,7 @@ async def scrape_ebay_search(categories, max_pages=1):
     async with aiohttp.ClientSession() as session:
         for category, query in categories.items():
             print(f"\n{'=' * 30}\nStarting {category} scraping\n{'=' * 30}")
+            tasks = [scrape_search_page(session, query, page, semaphore, category) for page in range(1, max_pages + 1)]
             tasks = [scrape_search_page(session, query, page, semaphore, category) for page in range(1, max_pages + 1)]
 
             search_results = await asyncio.gather(*tasks)
@@ -169,15 +178,19 @@ def save_to_csv(data, category, save_directory, fieldnames):
         writer.writerows(data)
 
     print(f"Saved {len(data)} {category} items to {filename}")
+    print(f"Saved {len(data)} {category} items to {filename}")
 
 async def main():
     categories = {
+        "Laptops": "laptop",
         "Laptops": "laptop",
         "Gaming Monitors": "gaming monitor",
         "Smart Watches": "smart watch",
         "Graphics Cards": "graphics card"
     }
 
+    max_pages = 18
+    save_directory = "data/raw/ebay"
     max_pages = 18
     save_directory = "data/raw/ebay"
 
@@ -189,9 +202,15 @@ async def main():
         "Gaming Monitors": ['Title', 'Price', 'Screen Size', 'Maximum Resolution', 'Aspect Ratio', 'Refresh Rate', 'Response Time', 'Brand', 'Model', 'Collection Date'],
         "Smart Watches": ['Title', 'Price', 'Case Size', 'Battery Capacity', 'Brand', 'Model', 'Operating System', 'Storage Capacity', 'Collection Date'],
         "Graphics Cards": ['Title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
+        "Laptops": ['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage', 'Collection Date'],
+        "Gaming Monitors": ['Title', 'Price', 'Screen Size', 'Maximum Resolution', 'Aspect Ratio', 'Refresh Rate', 'Response Time', 'Brand', 'Model', 'Collection Date'],
+        "Smart Watches": ['Title', 'Price', 'Case Size', 'Battery Capacity', 'Brand', 'Model', 'Operating System', 'Storage Capacity', 'Collection Date'],
+        "Graphics Cards": ['Title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
     }
 
     for category, products in all_products.items():
+        if products:
+            save_to_csv(products, category, save_directory, category_fields[category])
         if products:
             save_to_csv(products, category, save_directory, category_fields[category])
 

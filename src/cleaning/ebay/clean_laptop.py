@@ -1,69 +1,124 @@
+import os
 import pandas as pd
 import numpy as np
-import os
+import re
+file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\laptops_2025_01_29_scrape1.csv'
+df = pd.read_csv(file_path)
 
-# Définir le chemin du fichier
-file_path = r"/data/raw/ebay/laptops_results.csv"
-
-# Vérifier si le fichier existe
-if not os.path.exists(file_path):
-    raise FileNotFoundError(
-        f"Le fichier '{file_path}' est introuvable. Vérifiez le chemin ou l'emplacement du fichier.")
-
-# Charger les données
-data = pd.read_csv(file_path)
+# Définir le chemin d'enregistrement
+output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_laptop1.csv'
+output_dir = os.path.dirname(output_path)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)  # Crée les d
+df = pd.read_csv(file_path)
 
 
-# --- 1. Suppression des variations inutiles dans les titres ---
-def clean_title(title):
-    # Retirer les mentions inutiles (couleur, taille, etc.)
-    keywords_to_remove = ["Rouge", "Bleu", "Noir", "\"", "inch", "in.", "Edition", "Magic Keyboard"]
-    for word in keywords_to_remove:
-        title = title.replace(word, "")
-    return title.strip()
+
+# 2. Nettoyer la colonne Price
+def clean_price(price):
+    if isinstance(price, str):
+        cleaned = ''.join(c for c in price if c.isdigit() or c in {'.', ','})
+        cleaned = cleaned.replace(',', '.').replace(' ', '')
+        if '.' in cleaned:
+            parts = cleaned.split('.')
+            if len(parts) > 2:
+                cleaned = parts[0] + '.' + ''.join(parts[1:])
+        return float(cleaned) if cleaned else np.nan
+    return price
 
 
-data["Title"] = data["Title"].apply(clean_title)
-
-# --- 2. Gestion des valeurs manquantes ---
+df['Price'] = df['Price'].apply(clean_price)
 
 
-# Imputation pour d'autres colonnes
-columns_to_fill_mean = ["RAM", "Storage"]
-for col in columns_to_fill_mean:
-    if col in data.columns:
-        data[col] = data[col].fillna(data[col].mode()[0] if data[col].dtype == 'O' else data[col].mean())
-
-# --- 3. Suppression des doublons ---
-data.drop_duplicates(inplace=True)
-
-
-# --- 4. Standardisation des formats ---
-def standardize_units(value):
-    if isinstance(value, str):
-        value = value.replace("GB", "").replace("TB", "000").strip()
-    try:
-        return int(value)
-    except ValueError:
+# 3. Uniformisation des colonnes
+def convert_to_gb(value):
+    if pd.isna(value) or value in ['N/A', '', ' ']:
         return np.nan
+    match = re.match(r'(\d+\.?\d*)\s*([GTM]B?|GB)', str(value), re.IGNORECASE)
+    if match:
+        num, unit = match.groups()
+        num = float(num)
+        unit = unit.upper()
+        if 'T' in unit:
+            return num * 1000
+        elif 'M' in unit:
+            return num / 1000
+        return num
+    return np.nan
 
 
-data["RAM"] = data["RAM"].apply(standardize_units)
-data["Storage"] = data["Storage"].apply(standardize_units)
+for col in ['RAM', 'Storage']:
+    df[col] = df[col].apply(convert_to_gb).astype(float)
 
-# --- 5. Gestion des valeurs aberrantes ---
-# Nettoyer la colonne 'Price' (retirer $, virgules et convertir en float)
-data["Price"] = data["Price"].str.replace("$", "").str.replace(",", "").astype(float)
+df['Screen Size'] = df['Screen Size'].str.extract(r'(\d+\.?\d*)').astype(float)
 
-# Exclusion des prix excessivement bas/élevés (exemple arbitraire)
+# 4. Imputation des valeurs manquantes
+imputation_rules = {
+    'RAM': 'median',
+    'Storage': 'median',
+    'Screen Size': 'median',
+    'CPU': 'ffill',
+    'Price': 'median'
+}
+
+for col, method in imputation_rules.items():
+    if method == 'median':
+        # Remplacer inplace par une affectation explicite
+        df[col] = df[col].fillna(df[col].median())
+    elif method == 'ffill':
+        # Remplacer inplace par une méthode d'affectation explicite
+        df[col] = df[col].ffill()
+
+# Nettoyage spécifique pour la colonne GPU
+# Remplacer les valeurs NaN par une valeur par défaut (e.g., "Unknown")
+df['GPU'] = df['GPU'].fillna('Unknown')
+
+df['GPU'] = df['GPU'].fillna('Unknown Graphics')
 
 
-# --- 6. Variables indicatrices/dummies ---
-if "Brand" in data.columns:
-    data = pd.get_dummies(data, columns=["Brand"], prefix="Brand", drop_first=True)
 
-# Sauvegarde des données nettoyées
-output_path = r"/data/cleaned/ebay/cleaned_laptops_results.csv"
-data.to_csv(output_path, index=False)
 
-print(f"Nettoyage des données terminé. Fichier sauvegardé sous '{output_path}'.")
+# 5. Nettoyer les titres
+def clean_title(title):
+    return re.sub(
+        r'(?i)\b(8GB|. |PC|Notebook|Ryzen|UHD|Graphics|DDR4|AMD|W11|Win11|Win|11|Cond|!!|LOADED|TouchBar|Mac OS|Black| i3StorageWin|Gaming|Laptop|Touchscreen|Pro|15.6|Windows|RTX|FHD|LaptopWin11|HDD| ,|French|13inch|'
+        r' - | /|macOS|VENTURA|FREE|SHIPPIN|i9|13.3|inches|TURBO|"|- | , |13INCH|EXCELLENT|'
+        r'REFURBISHED|NEW|MWTK2LL|Qwerty|Spanish|Keyboard|British|\d+GB|\d+TB|[\d\.]+ ?GHz| GB |'
+        r'rouge|Gray|BIG SUR|WEBCAM|WIFI|BLUETOOTHGB|TB|space gray|silver|gold|touch bar|GHz|'
+        r'Intel|Core|i7|th|Gen|GB|Very|RAM|i5| GB| TB|GB GB|.GHZ| CPU | GPU|-|SSD|256|512|Good|'
+        r'Condition|magic keyboard|✅|🔋|grade [A-B]|warranty\.\.\.)',
+        '',
+        str(title)
+    ).strip().replace('  ', '')
+
+
+df['Title'] = df['Title'].apply(clean_title)
+# Corrige la condition pour la colonne 'Model'
+df['Model'] = df['Model'].replace('', np.nan)  # Remplacer '' par NaN pour uniformité
+df['Model'] = df['Model'].fillna(df['Title'])  # Remplacer les NaN dans 'Model' par les valeurs de 'Title'
+
+# 6. Conversion finale du stockage en GB
+df['Storage'] = df['Storage'].round(2)
+
+# Sauvegarder le résultat
+df = df[df['Price'] >= 90]
+
+
+def remove_duplicates_keep_min_price(df):
+    # Convertir la colonne Price en numérique si ce n'est pas déjà fait
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
+    # Identifier les colonnes qui définissent les caractéristiques uniques d'un produit
+    key_columns = ['Model', 'RAM', 'CPU', 'Brand', 'Storage']
+    df = df.sort_values(by='Price', ascending=True)
+    df_cleaned = df.drop_duplicates(subset=key_columns, keep='first')
+
+    return df_cleaned
+
+
+df = remove_duplicates_keep_min_price(df)
+
+output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_laptop1.csv'
+df.to_csv(output_path, index=False)
+
+print("Nettoyage terminé ! Fichier sauvegardé sous : laptops_clean_2025-01-28.csv")
+print(f"Shape final : {df.shape}")
