@@ -1,14 +1,17 @@
+import os
 import pandas as pd
 import numpy as np
 import re
-
-# Charger les données
 file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\laptops_2025_01_29_scrape1.csv'
-# Charger le fichier CSV dans un DataFrame
 df = pd.read_csv(file_path)
 
+# Définir le chemin d'enregistrement
+output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_laptop1.csv'
+output_dir = os.path.dirname(output_path)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)  # Crée les d
+df = pd.read_csv(file_path)
 
-# 1. Supprimer la colonne GPU
 
 
 # 2. Nettoyer la colonne Price
@@ -73,9 +76,7 @@ df['GPU'] = df['GPU'].fillna('Unknown')
 df['GPU'] = df['GPU'].fillna('Unknown Graphics')
 
 
-# Si absolument nécessaire, compter les occurrences (mode) pour les valeurs manquantes
-# Cette imputation est statistiquement pertinente si NaN sont fréquents.
-# df['GPU'] = df['GPU'].fillna(df['GPU'].mode()[0])
+
 
 # 5. Nettoyer les titres
 def clean_title(title):
@@ -101,6 +102,21 @@ df['Storage'] = df['Storage'].round(2)
 
 # Sauvegarder le résultat
 df = df[df['Price'] >= 90]
+
+
+def remove_duplicates_keep_min_price(df):
+    # Convertir la colonne Price en numérique si ce n'est pas déjà fait
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
+    # Identifier les colonnes qui définissent les caractéristiques uniques d'un produit
+    key_columns = ['Model', 'RAM', 'CPU', 'Brand', 'Storage']
+    df = df.sort_values(by='Price', ascending=True)
+    df_cleaned = df.drop_duplicates(subset=key_columns, keep='first')
+
+    return df_cleaned
+
+
+df = remove_duplicates_keep_min_price(df)
+
 output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_laptop1.csv'
 df.to_csv(output_path, index=False)
 

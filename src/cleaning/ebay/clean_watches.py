@@ -158,6 +158,18 @@ df['Title'] = df['Title'].apply(clean_title)
 print(df.isnull().sum())
 df = df[df.apply(lambda row: list(row).count('Unknown') < 2, axis=1)]
 
+def remove_duplicates(df, subset_columns, price_column='Price'):
+
+    df = df.sort_values(by=price_column, ascending=True)
+    # Supprimer les doublons en gardant le premier (celui avec le prix minimum)
+    df = df.drop_duplicates(subset=subset_columns, keep='first')
+    return df
+
+subset_columns = ['Brand', 'Model', 'Storage Capacity', 'Case Size', 'Battery Capacity']
+
+# Suppression des doublons
+df = remove_duplicates(df, subset_columns)
+
 output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_watch1.csv'
 df.to_csv(output_path, index=False)
 

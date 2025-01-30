@@ -120,9 +120,22 @@ df['Title'] = df['Title'].apply(clean_title_advanced)
 # Résultat
 
 # 6. Suppression des doublons
-df = df.drop_duplicates(subset=['Title', 'Brand', 'Model', 'Screen_Size_in'])
 df = df.drop('Max_Resolution', axis=1)
 df = df.dropna(thresh=df.shape[1] - 2)
+# Suppression des doublons en gardant celui avec le prix minimum
+def remove_duplicates_with_min_price(dataframe, columns_to_check, price_column):
+
+    dataframe = dataframe.sort_values(by=price_column, ascending=True)  # Trier par prix croissant
+    dataframe = dataframe.drop_duplicates(subset=columns_to_check,keep='first')  # Conserver le premier (prix le plus bas)
+    return dataframe
+
+
+# Appliquer la fonction sur le DataFrame
+columns_to_check_for_duplicates = ['Brand','Model', 'Screen_Size_in', 'Refresh_Rate_Hz', 'Response_Time_ms']
+df = remove_duplicates_with_min_price(df, columns_to_check_for_duplicates, 'Price')
+
+
+
 # Export final
 output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_monitor1.csv'
 df.to_csv(output_path, index=False)

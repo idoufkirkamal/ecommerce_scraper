@@ -123,7 +123,16 @@ def fill_with_mode(series):
 df['Memory Type'] = df.groupby('Chipset/GPU Model')['Memory Type'].transform(fill_with_mode)
 df['Connectors'] = df.groupby('Chipset/GPU Model')['Connectors'].transform(fill_with_mode)
 
-# Save the cleaned data
+# Supprimer les doublons en conservant la ligne avec le prix minimum
+def remove_duplicates_with_min_price(df):
+    columns_for_duplicates = [ 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model']
+    idx_min_price = df.groupby(columns_for_duplicates)['Price'].idxmin()
+    return df.loc[idx_min_price].reset_index(drop=True)
+
+
+# Appliquer cette méthode à votre DataFrame
+df = remove_duplicates_with_min_price(df)
+
 
 
 # 8. Validation des données
