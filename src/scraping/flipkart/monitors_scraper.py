@@ -135,14 +135,13 @@ def scrape_flipkart_page(url):
         return []
 
 
-def scrape_flipkart(category_url, num_pages, category_name="monitors", scrape_number=1, output_dir="data/raw/flipkart"):
+def scrape_flipkart(category_url, num_pages, category_name="monitors", output_dir="data/raw/flipkart"):
     """
     Scrapes Flipkart products for a given category and saves the output with a dynamic filename.
     Args:
         category_url (str): URL of the category to scrape.
         num_pages (int): Number of pages to scrape.
         category_name (str): Name of the category being scraped.
-        scrape_number (int): The scrape iteration number (e.g., 1, 2, 3, 4 for the month).
         output_dir (str): Directory to save the scraped data.
     """
     aggregated_results = []
@@ -164,6 +163,9 @@ def scrape_flipkart(category_url, num_pages, category_name="monitors", scrape_nu
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
+        # Get the scrape iteration number based on existing files
+        scrape_number = get_next_scrape_number(category_name, formatted_date, output_dir)
+
         # Create a dynamic filename based on category, date, and scrape iteration
         filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
 
@@ -183,13 +185,29 @@ def scrape_flipkart(category_url, num_pages, category_name="monitors", scrape_nu
     return aggregated_results
 
 
+def get_next_scrape_number(category_name, formatted_date, output_dir):
+    """Returns the next scrape number based on existing files in the directory."""
+    # List all files in the directory
+    files = os.listdir(output_dir)
+    pattern = re.compile(rf"{category_name}_{formatted_date}_scrape(\d+)\.csv")
+    scrape_numbers = []
+
+    # Find all matching files and extract scrape numbers
+    for file in files:
+        match = pattern.match(file)
+        if match:
+            scrape_numbers.append(int(match.group(1)))
+
+    # Return the next scrape number
+    return max(scrape_numbers, default=0) + 1
+
+
 # Main script
 if __name__ == "__main__":
     # Define the category URL and scrape parameters
     category_url = "https://www.flipkart.com/search?q=monitor&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off"
     num_pages = 18  # Number of pages to scrape
-    scrape_number = 2  # Scrape number based on iteration
     category_name = "monitors"  # Define the category name
 
     # Perform the scraping
-    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name, scrape_number=scrape_number)
+    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name)

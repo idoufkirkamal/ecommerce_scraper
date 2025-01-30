@@ -173,9 +173,9 @@ def save_to_csv(data, category, all_spec_keys):
     print(f"Data saved to {filepath}")
 
 # Run scraper with pagination support
-category = "laptops"
-max_pages_to_scrape = 2  # Adjust this value to control the number of pages scraped
-scraped_data, all_spec_keys = scrape_ubuy_selenium("https://www.ubuy.ma/en/category/laptops-21457", max_pages=max_pages_to_scrape)
+category = "smart_watches"
+max_pages_to_scrape = 10  # Adjust this value to control the number of pages scraped
+scraped_data, all_spec_keys = scrape_ubuy_selenium("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watche", max_pages=max_pages_to_scrape)
 
 if scraped_data:
     save_to_csv(scraped_data, category, all_spec_keys)

@@ -63,13 +63,9 @@ def scrape_ubuy_selenium(base_url, max_pages=3):
             driver.get(current_url)
             
             # Wait for product cards to load
-            try:
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-card"))
-                )
-            except Exception as e:
-                print(f"Error waiting for product cards: {e}")
-                break
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-card"))
+            )
 
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             product_blocks = soup.find_all('div', class_='product-card')
@@ -173,9 +169,9 @@ def save_to_csv(data, category, all_spec_keys):
     print(f"Data saved to {filepath}")
 
 # Run scraper with pagination support
-category = "laptops"
-max_pages_to_scrape = 2  # Adjust this value to control the number of pages scraped
-scraped_data, all_spec_keys = scrape_ubuy_selenium("https://www.ubuy.ma/en/category/laptops-21457", max_pages=max_pages_to_scrape)
+category = "graphics_cards"
+max_pages_to_scrape = 3  # Adjust this value to control the number of pages scraped
+scraped_data, all_spec_keys = scrape_ubuy_selenium("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", max_pages=max_pages_to_scrape)
 
 if scraped_data:
     save_to_csv(scraped_data, category, all_spec_keys)
