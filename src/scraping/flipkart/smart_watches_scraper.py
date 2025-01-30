@@ -134,18 +134,19 @@ def scrape_flipkart_page(url):
         print(f"Error occurred while scraping {url}: {e}")
         return []
 
-def get_next_scrape_number(category_name, formatted_date, output_dir):
-    """Returns the next scrape number based on existing files in the directory."""
-    files = os.listdir(output_dir)
-    pattern = re.compile(rf"{category_name}_{formatted_date}_scrape(\d+)\.csv")
-    scrape_numbers = []
-
-    for file in files:
-        match = pattern.match(file)
-        if match:
-            scrape_numbers.append(int(match.group(1)))
-
-    return max(scrape_numbers, default=0) + 1
+def get_next_scrape_number(output_dir, category_name):
+    """Determine the next scrape number globally, regardless of the date."""
+    scrape_number = 1
+    for filename in os.listdir(output_dir):
+        if filename.startswith(f"{category_name}_") and filename.endswith(".csv"):
+            try:
+                # Extract the scrape number from the filename
+                current_number = int(filename.split('_scrape')[-1].split('.')[0])
+                if current_number >= scrape_number:
+                    scrape_number = current_number + 1
+            except ValueError:
+                continue
+    return scrape_number
 
 def scrape_flipkart(category_url, num_pages, category_name="smartwatches", output_dir="data/raw/flipkart"):
     """
@@ -173,7 +174,8 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", outpu
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
-        scrape_number = get_next_scrape_number(category_name, formatted_date, output_dir)
+        # Determine the next scrape number globally
+        scrape_number = get_next_scrape_number(output_dir, category_name)
 
         filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
 
@@ -192,7 +194,7 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", outpu
 # Main script
 if __name__ == "__main__":
     category_url = "https://www.flipkart.com/wearable-smart-devices/smart-watches/pr?sid=ajy,buh&q=smart+watches&otracker=categorytree"
-    num_pages = 18
+    num_pages = 18 # Number of pages to scrape
     category_name = "smart_watches"
 
     scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name)

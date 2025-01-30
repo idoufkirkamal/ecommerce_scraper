@@ -1,27 +1,38 @@
 import os
 import csv
+import time
+import random
 from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-from webdriver_manager.chrome import ChromeDriverManager
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from webdriver_manager.chrome import ChromeDriverManager
 
+# Function to initialize Selenium driver
+def init_driver():
+    options = uc.ChromeOptions()
+    options.headless = False  # Run in visible mode for debugging
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920x1080")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    
+    driver = uc.Chrome(driver_executable_path=ChromeDriverManager().install(), options=options)
+    return driver
+
+# Function to scrape product details
 def scrape_product_details(driver, product_url):
-    """Scrapes detailed product specifications from a product page using the existing driver instance."""
+    """Scrapes detailed product specifications from a product page."""
     try:
-        print(f"Opening product page: {product_url}")
         driver.get(product_url)
-        
-        # Wait for the specification table to load
+        time.sleep(random.uniform(2, 5))  # Random delay to avoid detection
+
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div#additional-info table, div#technical-info table"))
         )
-        
+
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         specs = {}
 
@@ -31,7 +42,7 @@ def scrape_product_details(driver, product_url):
             rows = table.find_all("tr")
             for row in rows:
                 cols = row.find_all("td")
-                if len(cols) == 2:  # Ensure valid row
+                if len(cols) == 2:
                     key = cols[0].text.strip()
                     value = cols[1].text.strip()
                     specs[key] = value
@@ -41,17 +52,11 @@ def scrape_product_details(driver, product_url):
         print(f"Error scraping {product_url}: {e}")
         return {}
 
+# Function to scrape Ubuy product listings
 def scrape_ubuy_selenium(base_url, max_pages=3):
-    """Scrapes multiple pages of product data from Ubuy using Selenium and BeautifulSoup."""
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920x1080")
-    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-
+    """Scrapes multiple pages of Ubuy using Selenium and BeautifulSoup."""
+    driver = init_driver()
+    
     try:
         scraped_items = []
         all_spec_keys = set()
@@ -61,8 +66,9 @@ def scrape_ubuy_selenium(base_url, max_pages=3):
         while current_page <= max_pages:
             print(f"Scraping page {current_page}: {current_url}")
             driver.get(current_url)
-            
-            # Wait for product cards to load
+            time.sleep(random.uniform(2, 5))
+
+            # Wait for product listings
             try:
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-card"))
@@ -77,7 +83,7 @@ def scrape_ubuy_selenium(base_url, max_pages=3):
                 print("No products found. The page structure may have changed.")
                 break
 
-            # Collect product URLs for concurrent scraping
+            # Collect product URLs
             product_urls = []
             for product in product_blocks:
                 link_element = product.find('a', class_='product-img')
@@ -95,7 +101,6 @@ def scrape_ubuy_selenium(base_url, max_pages=3):
                         specifications = future.result()
                         all_spec_keys.update(specifications.keys())
 
-                        # Find the corresponding product block
                         for product in product_blocks:
                             link_element = product.find('a', class_='product-img')
                             if link_element and "href" in link_element.attrs:
@@ -136,25 +141,33 @@ def scrape_ubuy_selenium(base_url, max_pages=3):
     finally:
         driver.quit()
 
+# Function to determine next scrape number
+def get_next_scrape_number(output_dir, category):
+    """Determine the next scrape number globally, regardless of the date."""
+    scrape_number = 1
+    for filename in os.listdir(output_dir):
+        if filename.startswith(f"{category}_") and filename.endswith(".csv"):
+            try:
+                current_number = int(filename.split('_scrape')[-1].split('.')[0])
+                if current_number >= scrape_number:
+                    scrape_number = current_number + 1
+            except ValueError:
+                continue
+    return scrape_number
+
+# Function to save scraped data to CSV
 def save_to_csv(data, category, all_spec_keys):
-    """Saves scraped data to a CSV file with each specification in its own column."""
+    """Saves scraped data to CSV file."""
     output_dir = "data/raw/ubuy"
     os.makedirs(output_dir, exist_ok=True)
 
     today_date = datetime.today().strftime("%Y_%m_%d")
-    scrape_count = 1
-    filename = f"{category}_{today_date}_scrape{scrape_count}.csv"
+    scrape_number = get_next_scrape_number(output_dir, category)
+    filename = f"{category}_{today_date}_scrape{scrape_number}.csv"
     filepath = os.path.join(output_dir, filename)
 
-    while os.path.exists(filepath):
-        scrape_count += 1
-        filename = f"{category}_{today_date}_scrape{scrape_count}.csv"
-        filepath = os.path.join(output_dir, filename)
-
-    # Define column headers
     fieldnames = ["title", "price", "image_url", "product_url"] + list(all_spec_keys)
 
-    # Save data to CSV
     with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -166,15 +179,14 @@ def save_to_csv(data, category, all_spec_keys):
                 "image_url": item["image_url"],
                 "product_url": item["product_url"]
             }
-            # Add specifications dynamically
             row.update(item["specifications"])
             writer.writerow(row)
 
     print(f"Data saved to {filepath}")
 
-# Run scraper with pagination support
+# Run scraper
 category = "smart_watches"
-max_pages_to_scrape = 10  # Adjust this value to control the number of pages scraped
+max_pages_to_scrape = 2
 scraped_data, all_spec_keys = scrape_ubuy_selenium("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watche", max_pages=max_pages_to_scrape)
 
 if scraped_data:

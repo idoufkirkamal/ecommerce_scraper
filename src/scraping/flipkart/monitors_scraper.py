@@ -134,6 +134,19 @@ def scrape_flipkart_page(url):
         print(f"Error occurred while scraping {url}: {e}")
         return []
 
+def get_next_scrape_number(output_dir, category_name):
+    """Determine the next scrape number globally, regardless of the date."""
+    scrape_number = 1
+    for filename in os.listdir(output_dir):
+        if filename.startswith(f"{category_name}_") and filename.endswith(".csv"):
+            try:
+                # Extract the scrape number from the filename
+                current_number = int(filename.split('_scrape')[-1].split('.')[0])
+                if current_number >= scrape_number:
+                    scrape_number = current_number + 1
+            except ValueError:
+                continue
+    return scrape_number
 
 def scrape_flipkart(category_url, num_pages, category_name="monitors", output_dir="data/raw/flipkart"):
     """
@@ -163,16 +176,14 @@ def scrape_flipkart(category_url, num_pages, category_name="monitors", output_di
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
-        # Get the scrape iteration number based on existing files
-        scrape_number = get_next_scrape_number(category_name, formatted_date, output_dir)
-
-        # Create a dynamic filename based on category, date, and scrape iteration
-        filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
+        # Determine the next scrape number globally
+        scrape_number = get_next_scrape_number(output_dir, category_name)
 
         # Create the output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
-        # Full path for the output file
+        # Generate the filename
+        filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
         output_path = os.path.join(output_dir, filename)
 
         # Save the data to a CSV file
@@ -183,23 +194,6 @@ def scrape_flipkart(category_url, num_pages, category_name="monitors", output_di
         print("No data scraped.")
 
     return aggregated_results
-
-
-def get_next_scrape_number(category_name, formatted_date, output_dir):
-    """Returns the next scrape number based on existing files in the directory."""
-    # List all files in the directory
-    files = os.listdir(output_dir)
-    pattern = re.compile(rf"{category_name}_{formatted_date}_scrape(\d+)\.csv")
-    scrape_numbers = []
-
-    # Find all matching files and extract scrape numbers
-    for file in files:
-        match = pattern.match(file)
-        if match:
-            scrape_numbers.append(int(match.group(1)))
-
-    # Return the next scrape number
-    return max(scrape_numbers, default=0) + 1
 
 
 # Main script
