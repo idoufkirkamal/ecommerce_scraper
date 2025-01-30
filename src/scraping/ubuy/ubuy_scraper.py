@@ -4,7 +4,6 @@ import time
 import random
 import logging
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -13,21 +12,33 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import undetected_chromedriver as uc
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Shared Functions
 def get_driver():
-    """Initialize an undetected ChromeDriver instance with randomized user-agent."""
-    options = uc.ChromeOptions()
-    options.headless = True  # Run in headless mode
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920x1080")
-    options.add_argument(f"--user-agent={get_random_user_agent()}")
+    """Initialize an undetected ChromeDriver instance."""
+    try:
+        logging.info("Initializing ChromeDriver...")
+        options = uc.ChromeOptions()
+        options.headless = False  # Set to False for debugging
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920x1080")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument(f"--user-agent={get_random_user_agent()}")
 
-    service = Service(ChromeDriverManager().install())
-    return uc.Chrome(service=service, options=options)
+        service = Service(ChromeDriverManager().install())
+        driver = uc.Chrome(service=service, options=options)
+        logging.info("ChromeDriver initialized successfully!")
+        return driver
+    except Exception as e:
+        logging.error(f"Failed to initialize ChromeDriver: {e}")
+        raise
 
 def get_random_user_agent():
     """Returns a randomly selected user-agent to avoid detection."""
@@ -38,22 +49,20 @@ def get_random_user_agent():
     ]
     return random.choice(user_agents)
 
-def scrape_product_details(product_url):
+def scrape_product_details(driver, product_url):
     """Scrapes detailed product specifications from a product page."""
-    driver = get_driver()
-    specs = {}
-    
     try:
         logging.info(f"Scraping product: {product_url}")
         driver.get(product_url)
         time.sleep(random.uniform(2, 5))  # Random delay
 
-        # Wait for the page to load
+        # Wait for the specifications table to load
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "div#additional-info table, div#technical-info table"))
         )
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
+        specs = {}
 
         # Extract specifications
         spec_tables = soup.select("div#additional-info table, div#technical-info table")
@@ -61,100 +70,14 @@ def scrape_product_details(product_url):
             for row in table.find_all("tr"):
                 cols = row.find_all("td")
                 if len(cols) == 2:
-                    specs[cols[0].text.strip()] = cols[1].text.strip()
+                    key = cols[0].text.strip()
+                    value = cols[1].text.strip()
+                    specs[key] = value
 
+        return specs
     except Exception as e:
         logging.error(f"Error scraping {product_url}: {e}")
-    finally:
-        driver.quit()
-
-    return specs
-
-def scrape_ubuy(base_url, max_pages=3):
-    """Scrapes product data from multiple pages on Ubuy."""
-    driver = get_driver()
-    scraped_items = []
-    all_spec_keys = set()
-    
-    try:
-        current_page = 1
-        current_url = base_url
-
-        while current_page <= max_pages:
-            logging.info(f"Scraping page {current_page}: {current_url}")
-            driver.get(current_url)
-            time.sleep(random.uniform(3, 6))  # Random delay
-
-            # Wait for product listings
-            try:
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-card"))
-                )
-            except Exception as e:
-                logging.error("No products found. Page may have changed.")
-                break
-
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            product_blocks = soup.find_all('div', class_='product-card')
-
-            if not product_blocks:
-                logging.info("No products found. Exiting scraping.")
-                break
-
-            # Collect product URLs
-            product_urls = []
-            for product in product_blocks:
-                link_element = product.find('a', class_='product-img')
-                if link_element and "href" in link_element.attrs:
-                    product_url = link_element['href']
-                    full_product_url = f"https://www.ubuy.ma{product_url}" if product_url.startswith('/') else product_url
-                    product_urls.append(full_product_url)
-
-            # Scrape details concurrently
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                future_to_url = {executor.submit(scrape_product_details, url): url for url in product_urls}
-                for future in as_completed(future_to_url):
-                    url = future_to_url[future]
-                    try:
-                        specifications = future.result()
-                        all_spec_keys.update(specifications.keys())
-
-                        # Find corresponding product details
-                        for product in product_blocks:
-                            link_element = product.find('a', class_='product-img')
-                            if link_element and "href" in link_element.attrs:
-                                product_url = link_element['href']
-                                full_product_url = f"https://www.ubuy.ma{product_url}" if product_url.startswith('/') else product_url
-                                if full_product_url == url:
-                                    title = product.find('h3', class_='product-title').text.strip() if product.find('h3', class_='product-title') else "No title"
-                                    price = product.find('p', class_='product-price').text.strip() if product.find('p', class_='product-price') else "No price"
-                                    image_url = product.find('img')['src'] if product.find('img') else "No image"
-
-                                    scraped_items.append({
-                                        "title": title,
-                                        "price": price,
-                                        "image_url": image_url,
-                                        "product_url": full_product_url,
-                                        "specifications": specifications
-                                    })
-                                    break
-                    except Exception as e:
-                        logging.error(f"Error processing {url}: {e}")
-
-            # Find and update next page URL
-            next_page_element = soup.find('a', class_='next-page')
-            if next_page_element and "href" in next_page_element.attrs:
-                current_url = f"https://www.ubuy.ma{next_page_element['href']}"
-                current_page += 1
-                time.sleep(random.uniform(3, 7))  # Randomized delay to prevent bot detection
-            else:
-                logging.info("No more pages found.")
-                break
-
-    finally:
-        driver.quit()
-
-    return scraped_items, all_spec_keys
+        return {}
 
 def get_next_scrape_number(output_dir, category):
     """Determines the next scrape number for versioning output files."""
@@ -197,13 +120,113 @@ def save_to_csv(data, category, all_spec_keys):
 
     logging.info(f"Data saved to {filepath}")
 
-# Run the scraper
-if __name__ == "__main__":
-    category = "laptops"
-    max_pages_to_scrape = 3
-    scraped_data, all_spec_keys = scrape_ubuy("https://www.ubuy.ma/en/category/laptops-21457", max_pages=max_pages_to_scrape)
+# Category-Specific Scraping Functions
+def scrape_ubuy(driver, base_url, max_pages):
+    """Scrapes product data from multiple pages on Ubuy."""
+    scraped_items = []
+    all_spec_keys = set()
+    
+    try:
+        current_page = 1
+        current_url = base_url
 
-    if scraped_data:
-        save_to_csv(scraped_data, category, all_spec_keys)
-    else:
-        logging.info("No data scraped.")
+        while current_page <= max_pages:
+            logging.info(f"Scraping page {current_page}: {current_url}")
+            driver.get(current_url)
+            time.sleep(random.uniform(3, 6))  # Random delay
+
+            # Wait for product listings
+            try:
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.product-card"))
+                )
+            except Exception as e:
+                logging.error("No products found. Page may have changed.")
+                break
+
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            product_blocks = soup.find_all('div', class_='product-card')
+
+            if not product_blocks:
+                logging.info("No products found. Exiting scraping.")
+                break
+
+            # Collect product URLs
+            product_urls = []
+            for product in product_blocks:
+                link_element = product.find('a', class_='product-img')
+                if link_element and "href" in link_element.attrs:
+                    product_url = link_element['href']
+                    full_product_url = f"https://www.ubuy.ma{product_url}" if product_url.startswith('/') else product_url
+                    product_urls.append(full_product_url)
+
+            # Scrape details concurrently
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                future_to_url = {executor.submit(scrape_product_details, driver, url): url for url in product_urls}
+                for future in as_completed(future_to_url):
+                    url = future_to_url[future]
+                    try:
+                        specifications = future.result()
+                        all_spec_keys.update(specifications.keys())
+
+                        # Find corresponding product details
+                        for product in product_blocks:
+                            link_element = product.find('a', class_='product-img')
+                            if link_element and "href" in link_element.attrs:
+                                product_url = link_element['href']
+                                full_product_url = f"https://www.ubuy.ma{product_url}" if product_url.startswith('/') else product_url
+                                if full_product_url == url:
+                                    title = product.find('h3', class_='product-title').text.strip() if product.find('h3', class_='product-title') else "No title"
+                                    price = product.find('p', class_='product-price').text.strip() if product.find('p', class_='product-price') else "No price"
+                                    image_url = product.find('img')['src'] if product.find('img') else "No image"
+
+                                    scraped_items.append({
+                                        "title": title,
+                                        "price": price,
+                                        "image_url": image_url,
+                                        "product_url": full_product_url,
+                                        "specifications": specifications
+                                    })
+                                    break
+                    except Exception as e:
+                        logging.error(f"Error processing {url}: {e}")
+
+            # Find and update next page URL
+            next_page_element = soup.find('a', class_='next-page')
+            if next_page_element and "href" in next_page_element.attrs:
+                current_url = f"https://www.ubuy.ma{next_page_element['href']}"
+                current_page += 1
+                time.sleep(random.uniform(3, 7))  # Randomized delay to prevent bot detection
+            else:
+                logging.info("No more pages found.")
+                break
+
+    except Exception as e:
+        logging.error(f"Error during scraping: {e}")
+    finally:
+        driver.quit()
+
+    return scraped_items, all_spec_keys
+
+# Main Execution
+if __name__ == "__main__":
+    try:
+        logging.info("Starting script...")
+        categories = {
+            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 3),
+            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 3),
+            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 3),
+            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 3)
+        }
+
+        for category, (base_url, max_pages) in categories.items():
+            logging.info(f"Scraping {category}...")
+            driver = get_driver()
+            scraped_data, all_spec_keys = scrape_ubuy(driver, base_url, max_pages)
+
+            if scraped_data:
+                save_to_csv(scraped_data, category, all_spec_keys)
+            else:
+                logging.info(f"No data scraped for {category}.")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
