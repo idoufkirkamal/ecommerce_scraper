@@ -63,10 +63,8 @@ def scrape_flipkart_product(product_url):
         specifications = extract_specifications(soup)
 
         rating_element = soup.find('div', class_='_3LWZlK')
-        rating_element = soup.find('div', class_='_3LWZlK')
         rating = get_text_or_default(rating_element)
 
-        reviews_element = soup.find('span', class_='_2_R_DZ')
         reviews_element = soup.find('span', class_='_2_R_DZ')
         reviews_text = get_text_or_default(reviews_element)
 
@@ -76,7 +74,6 @@ def scrape_flipkart_product(product_url):
         return {
             "rating": rating,
             "reviews": reviews,
-            **specifications,
             **specifications,
         }
 
@@ -128,7 +125,6 @@ def scrape_flipkart_page(url):
                 "image_url": image_url,
                 "product_url": product_url,
                 "collection_date": collection_date,
-                **specifications,
                 **specifications,
             })
 
@@ -201,5 +197,4 @@ if __name__ == "__main__":
     num_pages = 18 # Number of pages to scrape
     category_name = "smart_watches"
 
-    scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name)
     scraped_data = scrape_flipkart(category_url, num_pages, category_name=category_name)
