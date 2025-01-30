@@ -151,6 +151,19 @@ def scrape_flipkart_page(url):
         print(f"Error occurred while scraping {url}: {e}")
         return []
 
+def get_next_scrape_number(output_dir, category_name):
+    """Determine the next scrape number globally, regardless of the date."""
+    scrape_number = 1
+    for filename in os.listdir(output_dir):
+        if filename.startswith(f"{category_name}_") and filename.endswith(".csv"):
+            try:
+                # Extract the scrape number from the filename
+                current_number = int(filename.split('_scrape')[-1].split('.')[0])
+                if current_number >= scrape_number:
+                    scrape_number = current_number + 1
+            except ValueError:
+                continue
+    return scrape_number
 
 def scrape_flipkart(category_url, num_pages, category_name="smartwatches", output_dir="data/raw/flipkart"):
     """
@@ -180,19 +193,15 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", outpu
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
-        # Initialize scrape_number
-        scrape_number = 1
-        filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
+        # Determine the next scrape number globally
+        scrape_number = get_next_scrape_number(output_dir, category_name)
 
         # Create the output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
-        # Check if the file already exists and increment the scrape_number if it does
+        # Generate the filename
+        filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
         output_path = os.path.join(output_dir, filename)
-        while os.path.exists(output_path):
-            scrape_number += 1
-            filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
-            output_path = os.path.join(output_dir, filename)
 
         # Save the data to a CSV file
         df = pd.DataFrame(aggregated_results)
@@ -203,12 +212,11 @@ def scrape_flipkart(category_url, num_pages, category_name="smartwatches", outpu
 
     return aggregated_results
 
-
 # Main script
 if __name__ == "__main__":
     # Define the category URL and scrape parameters
     category_url = "https://www.flipkart.com/gaming-components/graphic-cards/pr?sid=4rr,tin,6zn&q=graphics+card&otracker=categorytree"
-    num_pages = 1  # Number of pages to scrape
+    num_pages = 18  # Number of pages to scrape
     category_name = "graphics_cards"  # Define the category name
 
     # Perform the scraping
