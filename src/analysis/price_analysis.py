@@ -100,15 +100,24 @@ def analyze_price_differences(df: pd.DataFrame, category: str):
         ['Memory Size', 'Memory Type', 'Chipset/GPU Model', 'platform', 'Collection Date']
     )['Price'].mean().unstack(level='platform')
     
+    # Initialize a counter for dynamic file naming
+    product_counter = 1
+    
     # Plot column graphs for each product
     for product, data in grouped.groupby(level=[0, 1, 2]):
-        product_name = f"{product[0]} {product[1]} - {product[2]}"
+        # Extract the title for the product
+        product_title = df[
+            (df['Memory Size'] == product[0]) &
+            (df['Memory Type'] == product[1]) &
+            (df['Chipset/GPU Model'] == product[2])
+        ]['Title'].iloc[0]  # Take the first title for the product
+        
         plt.figure(figsize=(12, 6))
         
         # Plot each platform's prices as columns
         data.plot(kind='bar', figsize=(12, 6))
         
-        plt.title(f'Price Trends for {product_name}')
+        plt.title(f'Price Trends for {product_title}')
         plt.xlabel('Collection Date')
         plt.ylabel('Price (USD)')
         
@@ -118,9 +127,18 @@ def analyze_price_differences(df: pd.DataFrame, category: str):
         plt.legend(title='Platform')
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(category_results / f'price_trends_{product_name.replace("/", "_")}.png')
+        
+        # Create a sanitized title for the file name
+        sanitized_title = "_".join(product_title.split()).replace("/", "_").replace("\\", "_").replace(":", "_").replace("*", "_").replace("?", "_").replace('"', "_").replace("<", "_").replace(">", "_").replace("|", "_")
+        
+        # Save the plot with dynamic file naming
+        file_name = f"Product{product_counter:02d}_{sanitized_title}.png"
+        plt.savefig(category_results / file_name)
         plt.close()
-
+        
+        # Increment the counter for the next product
+        product_counter += 1
+                   
 if __name__ == "__main__":
     categories = ['graphics_cards', 'laptops', 'monitors', 'smart_watches']
     for category in categories:
