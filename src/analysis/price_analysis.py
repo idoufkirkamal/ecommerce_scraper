@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from pathlib import Path
-from fuzzywuzzy import process, fuzz
+from matplotlib.dates import DateFormatter
 
 # Configure paths
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -42,86 +42,87 @@ def clean_data(df: pd.DataFrame):
 
 def clean_price_column(df: pd.DataFrame):
     """Clean the price column by removing currency symbols and converting to numeric"""
-    df['Price'] = df['Price'].replace(r'[\$,GBP,EUR]', '', regex=True)  # Use raw string for regex
-    df['Price'] = df['Price'].str.replace('/ea', '', regex=False)  # Remove "/ea" if present
-    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')  # Convert to numeric, handle errors
+    df['Price'] = df['Price'].replace(r'[\$,GBP,EUR]', '', regex=True)
+    df['Price'] = df['Price'].str.replace('/ea', '', regex=False)
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
     return df
 
-def standardize_product_names(df: pd.DataFrame):
-    """Standardize product names using fuzzy matching"""
-    # Extract unique product names
-    unique_names = df['Title'].unique()
+def filter_products_on_all_platforms(df: pd.DataFrame):
+    """Filter products available on all three platforms based on exact specifications"""
+    # Group by key specifications
+    grouped = df.groupby(
+        ['Memory Size', 'Memory Type', 'Chipset/GPU Model']
+    )['platform'].nunique().reset_index()
     
-    # Create a dictionary to map similar names to a standardized name
-    name_mapping = {}
-    for name in unique_names:
-        if not name:  # Skip empty names
-            name_mapping[name] = name
-            continue
-        
-        # Find the best match among existing standardized names
-        if name_mapping:  # Ensure name_mapping is not empty
-            match, score = process.extractOne(name, name_mapping.keys(), scorer=fuzz.token_sort_ratio)
-            if score > 80:  # Threshold for considering a match
-                name_mapping[name] = match
-            else:
-                name_mapping[name] = name  # Use the original name if no good match is found
-        else:
-            name_mapping[name] = name  # Use the original name if no mappings exist yet
+    # Filter products that appear on all three platforms
+    common_products = grouped[grouped['platform'] == 3]
     
-    # Apply the mapping to the DataFrame
-    df['standardized_name'] = df['Title'].map(name_mapping)
-    return df
+    # Merge with the original dataframe to get the full data for these products
+    df_filtered = pd.merge(
+        df,
+        common_products[['Memory Size', 'Memory Type', 'Chipset/GPU Model']],
+        on=['Memory Size', 'Memory Type', 'Chipset/GPU Model'],
+        how='inner'
+    )
+    
+    return df_filtered
 
 def analyze_price_differences(df: pd.DataFrame, category: str):
-    """Analyze price differences for similar products with the same specifications"""
-    # Create results directory for category
+    """Analyze price differences and plot trends for products available on all platforms"""
     category_results = RESULTS_PATH / category
     category_results.mkdir(exist_ok=True)
     
-    # Clean the data
+    # Clean and preprocess data
     df = clean_data(df)
-    
-    # Clean the price column
     df = clean_price_column(df)
     
-    # Standardize product names
-    df = standardize_product_names(df)
+    # Filter products available on all three platforms based on exact specifications
+    df = filter_products_on_all_platforms(df)
     
-    # Group by standardized name and specifications
-    grouped = df.groupby(
-        ['standardized_name', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'platform']
-    )['Price'].mean().unstack()
+    # If no products are available on all platforms, skip analysis
+    if df.empty:
+        print(f"No products available on all platforms for {category}. Skipping analysis.")
+        return
     
-    # Filter products that are available on all three platforms
-    grouped = grouped.dropna()
+    # Convert Collection Date to datetime and remove time component
+    df['Collection Date'] = pd.to_datetime(df['Collection Date']).dt.strftime('%Y-%m-%d')
     
-    # Calculate price differences
-    grouped['price_diff'] = grouped.max(axis=1) - grouped.min(axis=1)
+    # Aggregate data by day and platform
+    df_aggregated = df.groupby(
+        ['Memory Size', 'Memory Type', 'Chipset/GPU Model', 'platform', 'Collection Date']
+    )['Price'].mean().reset_index()
     
-    # Sort by price difference to highlight the most significant differences
-    grouped = grouped.sort_values(by='price_diff', ascending=False)
+    # Sort by date to ensure correct plotting order
+    df_aggregated = df_aggregated.sort_values('Collection Date')
     
-    # Select the top 5 products with the largest price differences
-    top_5 = grouped.head(5)
+    # Group data for analysis
+    grouped = df_aggregated.groupby(
+        ['Memory Size', 'Memory Type', 'Chipset/GPU Model', 'platform', 'Collection Date']
+    )['Price'].mean().unstack(level='platform')
     
-    # Save the top 5 results
-    top_5.to_csv(category_results / 'top_5_price_differences_same_specs.csv')
-    
-    # Visualization: Price differences for the top 5 products
-    plt.figure(figsize=(12, 6))
-    top_5.drop(columns=['price_diff']).plot(kind='bar', figsize=(12, 6))
-    plt.title(f'Price differences between the 3 platforms for a maximum of 5 products - {category}')
-    plt.ylabel('Price (USD)')
-    plt.xlabel('Product Name and Specifications')
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
-    plt.savefig(category_results / 'top_5_price_differences_same_specs.png')
-    plt.close()
+    # Plot column graphs for each product
+    for product, data in grouped.groupby(level=[0, 1, 2]):
+        product_name = f"{product[0]} {product[1]} - {product[2]}"
+        plt.figure(figsize=(12, 6))
+        
+        # Plot each platform's prices as columns
+        data.plot(kind='bar', figsize=(12, 6))
+        
+        plt.title(f'Price Trends for {product_name}')
+        plt.xlabel('Collection Date')
+        plt.ylabel('Price (USD)')
+        
+        # Set x-ticks to only show dates
+        plt.xticks(range(len(data.index)), data.index.get_level_values('Collection Date'), rotation=45, ha='right')
+        
+        plt.legend(title='Platform')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(category_results / f'price_trends_{product_name.replace("/", "_")}.png')
+        plt.close()
 
 if __name__ == "__main__":
     categories = ['graphics_cards', 'laptops', 'monitors', 'smart_watches']
-    
     for category in categories:
         try:
             print(f"Analyzing {category}...")
