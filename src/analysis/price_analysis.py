@@ -1,160 +1,131 @@
 import pandas as pd
-import os
-import glob
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import datetime
+import os
+from pathlib import Path
+from fuzzywuzzy import process, fuzz
 
-# 1. Data Loading and Preparation
-# --------------------------------
-def load_cleaned_data(base_path):
-    """
-    Load cleaned data from the specified base path.
-    Assumes data is organized by website and category.
-    """
-    websites = ["ebay", "flipkart", "ubuy"]
-    categories = ["graphics_cards", "laptops", "monitors", "smart_watches"]
-    all_data = []
+# Configure paths
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+CLEANED_DATA_PATH = PROJECT_ROOT / 'data' / 'cleaned'
+RESULTS_PATH = PROJECT_ROOT / 'results'
+RESULTS_PATH.mkdir(exist_ok=True)
 
-    for website in websites:
-        for category in categories:
-            path = os.path.join(base_path, website, category, "*.csv")
-            files = glob.glob(path)
-            
-            for file in files:
-                try:
-                    df = pd.read_csv(file)
-                    # Extract date from filename
-                    date_str = '_'.join(os.path.basename(file).split('_')[2:5])
-                    df['scrape_date'] = pd.to_datetime(date_str, format='%Y_%m_%d')
-                    df['website'] = website
-                    df['category'] = category
-                    all_data.append(df)
-                except Exception as e:
-                    print(f"Error loading {file}: {str(e)}")
+def load_cleaned_data(category: str):
+    """Load cleaned data from all platforms for a specific category"""
+    platforms = ['ebay', 'flipkart', 'ubuy']
+    dfs = []
     
-    return pd.concat(all_data, ignore_index=True)
-
-# 2. Price Comparison Analysis
-# --------------------------------
-def plot_price_comparison(df):
-    """
-    Compare prices across platforms for each category.
-    """
-    plt.figure(figsize=(14, 8))
-    sns.boxplot(x='category', y='price', hue='website', data=df)
-    plt.title('Price Distribution Comparison Across Platforms')
-    plt.xlabel('Product Category')
-    plt.ylabel('Price (converted to USD)')
-    plt.xticks(rotation=45)
-    plt.legend(title='Platform')
-    plt.tight_layout()
-    plt.show()
-
-# 3. Promotion Analysis
-# --------------------------------
-def analyze_promotions(df):
-    """
-    Analyze promotion frequency and trends over time.
-    """
-    # Promotion frequency by category
-    promo_freq = df.groupby(['category', 'website'])['promotion'].mean().reset_index()
+    for platform in platforms:
+        path = CLEANED_DATA_PATH / platform / category / f'*.csv'
+        for file in path.parent.glob(path.name):
+            df = pd.read_csv(file)
+            df['platform'] = platform  # Add platform identifier
+            dfs.append(df)
     
-    plt.figure(figsize=(14, 6))
-    sns.barplot(x='category', y='promotion', hue='website', data=promo_freq)
-    plt.title('Promotion Frequency by Category and Platform')
-    plt.xlabel('Product Category')
-    plt.ylabel('Promotion Rate (%)')
-    plt.xticks(rotation=45)
-    plt.show()
+    return pd.concat(dfs, ignore_index=True)
 
-    # Time-based promotion analysis example for graphics cards
-    gpu_promo = df[df['category'] == 'graphics_cards']
-    gpu_promo = gpu_promo.groupby(['scrape_date', 'website'])['promotion'].mean().reset_index()
+def clean_data(df: pd.DataFrame):
+    """Clean the data by removing empty rows and invalid values"""
+    # Drop rows where all values are missing
+    df = df.dropna(how='all')
     
-    plt.figure(figsize=(14, 6))
-    sns.lineplot(x='scrape_date', y='promotion', hue='website', data=gpu_promo, marker='o')
-    plt.title('Promotion Trends for Graphics Cards')
-    plt.xlabel('Date')
-    plt.ylabel('Promotion Rate (%)')
-    plt.show()
+    # Fill missing values in key columns with an empty string
+    for col in ['Title', 'Memory Size', 'Memory Type', 'Chipset/GPU Model']:
+        df[col] = df[col].fillna('')
+    
+    # Ensure key columns are treated as strings
+    for col in ['Title', 'Memory Size', 'Memory Type', 'Chipset/GPU Model']:
+        df[col] = df[col].astype(str)
+    
+    return df
 
-# 4. Time Series Price Analysis
-# --------------------------------
-def plot_price_trends(df, target_category='graphics_cards'):
-    """
-    Analyze price trends over time for a specific category.
-    """
-    category_data = df[df['category'] == target_category]
+def clean_price_column(df: pd.DataFrame):
+    """Clean the price column by removing currency symbols and converting to numeric"""
+    df['Price'] = df['Price'].replace(r'[\$,GBP,EUR]', '', regex=True)  # Use raw string for regex
+    df['Price'] = df['Price'].str.replace('/ea', '', regex=False)  # Remove "/ea" if present
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')  # Convert to numeric, handle errors
+    return df
+
+def standardize_product_names(df: pd.DataFrame):
+    """Standardize product names using fuzzy matching"""
+    # Extract unique product names
+    unique_names = df['Title'].unique()
     
-    plt.figure(figsize=(14, 6))
-    sns.lineplot(
-        x='scrape_date', 
-        y='price', 
-        hue='website', 
-        data=category_data, 
-        estimator='median', 
-        errorbar=None,
-        marker='o'
-    )
-    plt.title(f'Price Trends for {target_category.replace("_", " ").title()}')
-    plt.xlabel('Date')
+    # Create a dictionary to map similar names to a standardized name
+    name_mapping = {}
+    for name in unique_names:
+        if not name:  # Skip empty names
+            name_mapping[name] = name
+            continue
+        
+        # Find the best match among existing standardized names
+        if name_mapping:  # Ensure name_mapping is not empty
+            match, score = process.extractOne(name, name_mapping.keys(), scorer=fuzz.token_sort_ratio)
+            if score > 80:  # Threshold for considering a match
+                name_mapping[name] = match
+            else:
+                name_mapping[name] = name  # Use the original name if no good match is found
+        else:
+            name_mapping[name] = name  # Use the original name if no mappings exist yet
+    
+    # Apply the mapping to the DataFrame
+    df['standardized_name'] = df['Title'].map(name_mapping)
+    return df
+
+def analyze_price_differences(df: pd.DataFrame, category: str):
+    """Analyze price differences for similar products with the same specifications"""
+    # Create results directory for category
+    category_results = RESULTS_PATH / category
+    category_results.mkdir(exist_ok=True)
+    
+    # Clean the data
+    df = clean_data(df)
+    
+    # Clean the price column
+    df = clean_price_column(df)
+    
+    # Standardize product names
+    df = standardize_product_names(df)
+    
+    # Group by standardized name and specifications
+    grouped = df.groupby(
+        ['standardized_name', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'platform']
+    )['Price'].mean().unstack()
+    
+    # Filter products that are available on all three platforms
+    grouped = grouped.dropna()
+    
+    # Calculate price differences
+    grouped['price_diff'] = grouped.max(axis=1) - grouped.min(axis=1)
+    
+    # Sort by price difference to highlight the most significant differences
+    grouped = grouped.sort_values(by='price_diff', ascending=False)
+    
+    # Select the top 5 products with the largest price differences
+    top_5 = grouped.head(5)
+    
+    # Save the top 5 results
+    top_5.to_csv(category_results / 'top_5_price_differences_same_specs.csv')
+    
+    # Visualization: Price differences for the top 5 products
+    plt.figure(figsize=(12, 6))
+    top_5.drop(columns=['price_diff']).plot(kind='bar', figsize=(12, 6))
+    plt.title(f'Price differences between the 3 platforms for a maximum of 5 products - {category}')
     plt.ylabel('Price (USD)')
-    plt.xticks(rotation=45)
-    plt.show()
-
-# 5. Comparative Analysis Dashboard
-# --------------------------------
-def create_analysis_dashboard(df):
-    """
-    Create a dashboard of visualizations for comparative analysis.
-    """
-    fig, axes = plt.subplots(2, 2, figsize=(18, 12))
-    
-    # Price distribution
-    sns.boxplot(ax=axes[0, 0], x='category', y='price', hue='website', data=df)
-    axes[0, 0].set_title('Price Distribution Comparison')
-    axes[0, 0].tick_params(axis='x', rotation=45)
-    
-    # Promotion frequency
-    promo_data = df.groupby(['category', 'website'])['promotion'].mean().reset_index()
-    sns.barplot(ax=axes[0, 1], x='category', y='promotion', hue='website', data=promo_data)
-    axes[0, 1].set_title('Promotion Frequency by Category')
-    axes[0, 1].tick_params(axis='x', rotation=45)
-    
-    # Price trends for graphics cards
-    gpu_data = df[df['category'] == 'graphics_cards']
-    sns.lineplot(ax=axes[1, 0], 
-                x='scrape_date', 
-                y='price', 
-                hue='website', 
-                data=gpu_data,
-                estimator='median',
-                errorbar=None)
-    axes[1, 0].set_title('Graphics Cards Price Trends')
-    
-    # Price trends for laptops
-    laptop_data = df[df['category'] == 'laptops']
-    sns.lineplot(ax=axes[1, 1], 
-                x='scrape_date', 
-                y='price', 
-                hue='website', 
-                data=laptop_data,
-                estimator='median',
-                errorbar=None)
-    axes[1, 1].set_title('Laptops Price Trends')
-    
+    plt.xlabel('Product Name and Specifications')
+    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.show()
+    plt.savefig(category_results / 'top_5_price_differences_same_specs.png')
+    plt.close()
 
-# Main function to run the analysis
 if __name__ == "__main__":
-    # Load cleaned data
-    df = load_cleaned_data("data/cleaned")
+    categories = ['graphics_cards', 'laptops', 'monitors', 'smart_watches']
     
-    # Perform analysis
-    plot_price_comparison(df)
-    analyze_promotions(df)
-    plot_price_trends(df, 'graphics_cards')
-    plot_price_trends(df, 'laptops')
-    create_analysis_dashboard(df)
+    for category in categories:
+        try:
+            print(f"Analyzing {category}...")
+            df = load_cleaned_data(category)
+            analyze_price_differences(df, category)
+        except Exception as e:
+            print(f"Error processing {category}: {str(e)}")
