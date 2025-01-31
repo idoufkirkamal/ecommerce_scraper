@@ -49,12 +49,27 @@ def get_random_user_agent():
     ]
     return random.choice(user_agents)
 
+def handle_captcha(driver):
+    """Pause execution and allow the user to solve CAPTCHA manually."""
+    logging.info("CAPTCHA detected. Please solve it manually.")
+    input("Press Enter to continue after solving the CAPTCHA...")
+    logging.info("Resuming script execution...")
+
 def scrape_product_details(driver, product_url):
     """Scrapes detailed product specifications from a product page."""
     try:
         logging.info(f"Scraping product: {product_url}")
         driver.get(product_url)
         time.sleep(random.uniform(2, 5))  # Random delay
+
+        # Check for CAPTCHA
+        try:
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "iframe[src*='captcha']"))
+            )
+            handle_captcha(driver)  # Pause for manual CAPTCHA solving
+        except:
+            logging.info("No CAPTCHA detected. Proceeding with scraping...")
 
         # Wait for the specifications table to load
         WebDriverWait(driver, 10).until(
@@ -94,7 +109,8 @@ def get_next_scrape_number(output_dir, category):
 
 def save_to_csv(data, category, all_spec_keys):
     """Saves scraped data to a CSV file with specifications in separate columns."""
-    output_dir = "data/raw/ubuy"
+    # Create category-specific directory
+    output_dir = os.path.join("data/raw/ubuy", category)
     os.makedirs(output_dir, exist_ok=True)
 
     today_date = datetime.today().strftime("%Y_%m_%d")
@@ -134,6 +150,15 @@ def scrape_ubuy(driver, base_url, max_pages):
             logging.info(f"Scraping page {current_page}: {current_url}")
             driver.get(current_url)
             time.sleep(random.uniform(3, 6))  # Random delay
+
+            # Check for CAPTCHA
+            try:
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "iframe[src*='captcha']"))
+                )
+                handle_captcha(driver)  # Pause for manual CAPTCHA solving
+            except:
+                logging.info("No CAPTCHA detected. Proceeding with scraping...")
 
             # Wait for product listings
             try:
@@ -192,11 +217,17 @@ def scrape_ubuy(driver, base_url, max_pages):
                         logging.error(f"Error processing {url}: {e}")
 
             # Find and update next page URL
-            next_page_element = soup.find('a', class_='next-page')
-            if next_page_element and "href" in next_page_element.attrs:
-                current_url = f"https://www.ubuy.ma{next_page_element['href']}"
-                current_page += 1
-                time.sleep(random.uniform(3, 7))  # Randomized delay to prevent bot detection
+            next_page_element = soup.find('li', class_='page-item', title=str(current_page + 1))
+            if next_page_element:
+                next_button = next_page_element.find('button', class_='page-link')
+                if next_button and "data-pageno" in next_button.attrs:
+                    next_page_number = next_button['data-pageno']
+                    current_url = f"{base_url}&page={next_page_number}"
+                    current_page += 1
+                    time.sleep(random.uniform(3, 7))  # Randomized delay to prevent bot detection
+                else:
+                    logging.info("No more pages found.")
+                    break
             else:
                 logging.info("No more pages found.")
                 break
@@ -213,10 +244,10 @@ if __name__ == "__main__":
     try:
         logging.info("Starting script...")
         categories = {
-            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 3),
-            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 3),
-            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 3),
-            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 3)
+            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 18),
+            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 15),
+            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 15),
+            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 15)
         }
 
         for category, (base_url, max_pages) in categories.items():

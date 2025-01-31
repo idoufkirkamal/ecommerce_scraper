@@ -150,17 +150,20 @@ def get_next_scrape_number(save_directory, category):
     return scrape_number
 
 def save_to_csv(data, category, save_directory, fieldnames):
-    os.makedirs(save_directory, exist_ok=True)
-
-    # Format category name for filename
-    category_filename = category.lower().replace(' ', '_')
+    # Format category name for folder and filename
+    category_folder = category.lower().replace(' ', '_')
+    category_filename = category_folder
     today_date = datetime.now().strftime('%Y_%m_%d')
 
+    # Create the category folder if it doesn't exist
+    category_directory = os.path.join(save_directory, category_folder)
+    os.makedirs(category_directory, exist_ok=True)
+
     # Determine the next scrape number globally
-    scrape_number = get_next_scrape_number(save_directory, category_filename)
+    scrape_number = get_next_scrape_number(category_directory, category_filename)
 
     # Generate filename
-    filename = os.path.join(save_directory, f"{category_filename}_{today_date}_scrape{scrape_number}.csv")
+    filename = os.path.join(category_directory, f"{category_filename}_{today_date}_scrape{scrape_number}.csv")
 
     # Save data to CSV
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:

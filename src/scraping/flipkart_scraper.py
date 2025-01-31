@@ -192,14 +192,15 @@ def scrape_flipkart(category_url, num_pages, category_name, output_dir="data/raw
         today = datetime.today()
         formatted_date = today.strftime("%Y_%m_%d")
 
+        # Create category-specific directory
+        category_directory = os.path.join(output_dir, category_name)
+        os.makedirs(category_directory, exist_ok=True)
+
         # Determine the next scrape number globally
-        scrape_number = get_next_scrape_number(output_dir, category_name)
+        scrape_number = get_next_scrape_number(category_directory, category_name)
 
         filename = f"{category_name}_{formatted_date}_scrape{scrape_number}.csv"
-
-        os.makedirs(output_dir, exist_ok=True)
-
-        output_path = os.path.join(output_dir, filename)
+        output_path = os.path.join(category_directory, filename)
 
         df = pd.DataFrame(aggregated_results)
         df.to_csv(output_path, index=False, encoding='utf-8-sig')
