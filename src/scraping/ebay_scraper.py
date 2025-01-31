@@ -59,7 +59,7 @@ async def scrape_product_details(session, product_url, category):
                     'Screen Size': specs.get('Screen Size', 'N/A'),
                     'Storage': specs.get('SSD Capacity', 'N/A'),
                 })
-            elif category == "Gaming Monitors":
+            elif category == "Monitors":
                 product_details.update({
                     'Screen Size': specs.get('Screen Size', 'N/A'),
                     'Maximum Resolution': specs.get('Resolution', 'N/A'),
@@ -135,26 +135,35 @@ async def scrape_ebay_search(categories, max_pages=1):
 
     return all_products
 
-def save_to_csv(data, category, save_directory, fieldnames):
-    os.makedirs(save_directory, exist_ok=True)
+def get_next_scrape_number(save_directory, category):
+    """Determine the next scrape number globally, regardless of the date."""
+    scrape_number = 1
+    for filename in os.listdir(save_directory):
+        if filename.startswith(f"{category}_") and filename.endswith(".csv"):
+            try:
+                # Extract the scrape number from the filename
+                current_number = int(filename.split('_scrape')[-1].split('.')[0])
+                if current_number >= scrape_number:
+                    scrape_number = current_number + 1
+            except ValueError:
+                continue
+    return scrape_number
 
-    # Format category name for filename
-    category_filename = category.lower().replace(' ', '_')
+def save_to_csv(data, category, save_directory, fieldnames):
+    # Format category name for folder and filename
+    category_folder = category.lower().replace(' ', '_')
+    category_filename = category_folder
     today_date = datetime.now().strftime('%Y_%m_%d')
 
-    # Get existing files that match the pattern
-    existing_files = [
-        f for f in os.listdir(save_directory) if f.startswith(f"{category_filename}_{today_date}")
-    ]
+    # Create the category folder if it doesn't exist
+    category_directory = os.path.join(save_directory, category_folder)
+    os.makedirs(category_directory, exist_ok=True)
 
-    # Determine the next scrape number
-    scrape_numbers = [
-        int(f.split('_scrape')[1].split('.')[0]) for f in existing_files if '_scrape' in f
-    ]
-    next_scrape = max(scrape_numbers, default=0) + 1  # Start from 1 if no files exist
+    # Determine the next scrape number globally
+    scrape_number = get_next_scrape_number(category_directory, category_filename)
 
     # Generate filename
-    filename = os.path.join(save_directory, f"{category_filename}_{today_date}_scrape{next_scrape}.csv")
+    filename = os.path.join(category_directory, f"{category_filename}_{today_date}_scrape{scrape_number}.csv")
 
     # Save data to CSV
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
@@ -167,7 +176,7 @@ def save_to_csv(data, category, save_directory, fieldnames):
 async def main():
     categories = {
         "Laptops": "laptop",
-        "Gaming Monitors": "gaming monitor",
+        "Monitors": "monitor",
         "Smart Watches": "smart watch",
         "Graphics Cards": "graphics card"
     }
@@ -180,7 +189,7 @@ async def main():
 
     category_fields = {
         "Laptops": ['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage', 'Collection Date'],
-        "Gaming Monitors": ['Title', 'Price', 'Screen Size', 'Maximum Resolution', 'Aspect Ratio', 'Refresh Rate', 'Response Time', 'Brand', 'Model', 'Collection Date'],
+        "Monitors": ['Title', 'Price', 'Screen Size', 'Maximum Resolution', 'Aspect Ratio', 'Refresh Rate', 'Response Time', 'Brand', 'Model', 'Collection Date'],
         "Smart Watches": ['Title', 'Price', 'Case Size', 'Battery Capacity', 'Brand', 'Model', 'Operating System', 'Storage Capacity', 'Collection Date'],
         "Graphics Cards": ['Title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
     }
