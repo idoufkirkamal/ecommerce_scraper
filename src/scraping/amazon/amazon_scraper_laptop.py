@@ -129,8 +129,8 @@ def scrape_amazon(search_query, num_pages, output_dir="data/raw"):
     return detailed_results
 # Main script
 if __name__ == "__main__":
-    search_query = "laptop Mac"
-    num_pages = 20
+    search_query = "laptop"
+    num_pages = 15
 
     scraped_data = scrape_amazon(search_query, num_pages)
 

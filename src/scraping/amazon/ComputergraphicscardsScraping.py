@@ -3,7 +3,7 @@ import random
 import re
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 import pandas as pd
 import os
@@ -269,6 +269,6 @@ def scrape_amazon(search_query, num_pages):
 
 
 if __name__ == "__main__":
-    scraped_data = scrape_amazon("Computer graphics cards", 1)
+    scraped_data = scrape_amazon("Computer graphics cards", 15)
     print("\nSample results:")
     print(scraped_data[['title', 'price', 'brand']].head().to_string(index=False))

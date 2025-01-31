@@ -174,3 +174,73 @@ output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\clean
 df.to_csv(output_path, index=False)
 
 print("Data cleaning completed successfully.")
+
+
+
+
+def clean_smartwatch_data(df):
+    # Mapping des colonnes
+    column_mapping = {
+        'title': 'Title',
+        'price': 'Price',
+        'Standing screen display size': 'Case Size',
+        'Battery Capacity': 'Battery Capacity',
+        'Brand': 'Brand',
+        'Item model number': 'Model',
+        'Operating System': 'Operating System',
+        'Memory Storage Capacity': 'Storage Capacity'
+    }
+
+    # Sélection et renommage des colonnes
+    df = df[list(column_mapping.keys())].rename(columns=column_mapping)
+
+    # Nettoyage des colonnes
+    def clean_price(price):
+        if isinstance(price, str):
+            match = re.search(r'MAD\s*(\d+)', price)
+            return int(match.group(1)) if match else None
+        return price
+
+    def clean_size(size):
+        if isinstance(size, str):
+            match = re.search(r'(\d+\.?\d*)\s*(Inches|cm|")', size)
+            return f"{match.group(1)}''" if match else None
+        return size
+
+    def clean_battery(battery):
+        if isinstance(battery, str):
+            match = re.search(r'(\d+\.?\d*E?\+?\d*)\s*Milliamp Hours', battery)
+            return float(match.group(1)) * 1000 if match else None
+        return battery
+
+    cleaners = {
+        'Price': clean_price,
+        'Case Size': clean_size,
+        'Battery Capacity': clean_battery,
+        'Brand': lambda x: x.strip().title() if isinstance(x, str) else x,
+        'Model': lambda x: x.strip().upper() if isinstance(x, str) else x,
+        'Operating System': lambda x: re.sub(r'\s*,\s*', '/', x).title() if isinstance(x, str) else x,
+        'Storage Capacity': lambda x: re.sub(r'\s*MB\s*', 'MB', str(x)).replace(' ', '') if pd.notnull(x) else x
+    }
+
+    for col, func in cleaners.items():
+        df[col] = df[col].apply(func)
+
+    # Conversion des types de données
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
+
+    # Suppression des lignes avec au moins 2 valeurs manquantes
+    df = df.dropna(thresh=df.shape[1] - 1)
+
+    # Suppression des doublons exacts
+    df = df.drop_duplicates()
+
+    return df.reset_index(drop=True)
+
+
+# Utilisation
+input_file_ubuy = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ubuy\smart_watches_2025_01_29_scrape1.csv'
+
+df = pd.read_csv(input_file_ubuy)
+cleaned_df = clean_smartwatch_data(df)
+cleaned_df.to_csv('cleaned_smartwatches.csv', index=False)
