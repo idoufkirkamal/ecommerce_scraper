@@ -118,7 +118,8 @@ def save_to_csv(data, category, all_spec_keys):
     filename = f"{category}_{today_date}_scrape{scrape_number}.csv"
     filepath = os.path.join(output_dir, filename)
 
-    fieldnames = ["title", "price", "image_url", "product_url"] + list(all_spec_keys)
+    # Add "Collection Date" to the fieldnames
+    fieldnames = ["title", "price", "image_url", "product_url", "Collection Date"] + list(all_spec_keys)
 
     with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -129,7 +130,8 @@ def save_to_csv(data, category, all_spec_keys):
                 "title": item["title"],
                 "price": item["price"],
                 "image_url": item["image_url"],
-                "product_url": item["product_url"]
+                "product_url": item["product_url"],
+                "Collection Date": today_date  # Add the collection date
             }
             row.update(item["specifications"])
             writer.writerow(row)
@@ -244,10 +246,10 @@ if __name__ == "__main__":
     try:
         logging.info("Starting script...")
         categories = {
-            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 18),
-            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 15),
-            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 15),
-            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 15)
+            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 6),
+            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 6),
+            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 6),
+            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 6)
         }
 
         for category, (base_url, max_pages) in categories.items():
