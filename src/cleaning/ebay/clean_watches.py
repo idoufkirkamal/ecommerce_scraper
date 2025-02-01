@@ -6,7 +6,7 @@ from fuzzywuzzy import process
 from unidecode import unidecode
 
 # Load the data
-file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\smart_watches_2025-01-28.csv'
+file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\smart_watches\smart_watches_2025_01_29_scrape1.csv'
 df = pd.read_csv(file_path)
 
 
@@ -229,8 +229,6 @@ def clean_smartwatch_data(df):
     # Conversion des types de données
     df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
 
-    # Suppression des lignes avec au moins 2 valeurs manquantes
-    df = df.dropna(thresh=df.shape[1] - 1)
 
     # Suppression des doublons exacts
     df = df.drop_duplicates()
@@ -239,7 +237,7 @@ def clean_smartwatch_data(df):
 
 
 # Utilisation
-input_file_ubuy = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ubuy\smart_watches_2025_01_29_scrape1.csv'
+input_file_ubuy = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ubuy\smart_watches\smart_watches_2025_01_30_scrape1.csv'
 
 df = pd.read_csv(input_file_ubuy)
 cleaned_df = clean_smartwatch_data(df)
