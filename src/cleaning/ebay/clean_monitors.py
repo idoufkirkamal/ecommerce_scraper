@@ -237,10 +237,3 @@ cleaned_df.to_csv(r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\flipka
 # Afficher les premières lignes du DataFrame nettoyé
 print(cleaned_df.head())
 
-file_path_ubuy = r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ubuy\monitors_2025_01_29_scrape1.csv"
-df_ubuy = pd.read_csv(file_path_ubuy)
-
-cleaned_df = clean_monitor_flipkart(df_ubuy)
-cleaned_df.to_csv(r"C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ubuy\cleaned_monitor1.csv", index=False)
-# Afficher les premières lignes du DataFrame nettoyé
-print(cleaned_df.head())

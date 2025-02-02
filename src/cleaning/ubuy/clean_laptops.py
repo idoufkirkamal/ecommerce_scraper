@@ -116,12 +116,7 @@ df['GPU'] = df['Graphics Coprocessor'].apply(clean_gpu)
 df['Screen Size'] = df['Screen Size'].apply(clean_screen_size)
 df['Storage'] = df['Hard Disk Size'].apply(clean_storage)
 
-# Sélectionner les colonnes nécessaires
 cleaned_df = df[['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage']]
-
-# Sauvegarder le résultat nettoyé
-
-# Charger les données et appliquer le nettoyage
 
 
 cleaned_df.to_csv(r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ubuy\cleaned_laptops.csv', index=False)
