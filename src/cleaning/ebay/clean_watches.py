@@ -4,180 +4,171 @@ from datetime import datetime
 from sklearn.impute import SimpleImputer
 from fuzzywuzzy import process
 from unidecode import unidecode
-
-# Load the data
-file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\smart_watches\smart_watches_2025_01_29_scrape1.csv'
-df = pd.read_csv(file_path)
-
-
-# Function to clean Title
+from pathlib import Path
 import re
 
+# Define paths using relative paths
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Root folder of the project
+RAW_DATA_DIR_EBAY = BASE_DIR / 'data' / 'raw' / 'ebay' / 'smart_watches'
+RAW_DATA_DIR_UBUY = BASE_DIR / 'data' / 'raw' / 'ubuy' / 'smart_watches'
+CLEANED_DATA_DIR_EBAY = BASE_DIR / 'data' / 'cleaned' / 'ebay' / 'smart_watches'
+CLEANED_DATA_DIR_UBUY = BASE_DIR / 'data' / 'cleaned' / 'ubuy' / 'smart_watches'
 
+# Ensure the cleaned data directories exist
+CLEANED_DATA_DIR_EBAY.mkdir(parents=True, exist_ok=True)
+CLEANED_DATA_DIR_UBUY.mkdir(parents=True, exist_ok=True)
 
-# Function to clean Price
-def clean_price(price):
-    if pd.isna(price):
-        return np.nan
-    price = str(price).replace(',', '').replace('$', '').replace('GBP', '').replace('US', '').replace('/ea', '').replace('AU', '').replace('EUR', '').strip()
-    try:
-        return float(price)
-    except ValueError:
-        return np.nan
+# Debugging: Print paths
+print(f"Base directory: {BASE_DIR}")
+print(f"Raw data directory (eBay): {RAW_DATA_DIR_EBAY}")
+print(f"Raw data directory (Ubuy): {RAW_DATA_DIR_UBUY}")
+print(f"Cleaned data directory (eBay): {CLEANED_DATA_DIR_EBAY}")
+print(f"Cleaned data directory (Ubuy): {CLEANED_DATA_DIR_UBUY}")
 
-df['Price'] = df['Price'].apply(clean_price)
-price_imputer = SimpleImputer(strategy='median')
-df['Price'] = price_imputer.fit_transform(df[['Price']])
+# Check if raw data directories exist
+if not RAW_DATA_DIR_EBAY.exists():
+    raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR_EBAY}")
+if not RAW_DATA_DIR_UBUY.exists():
+    raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR_UBUY}")
 
-# Function to clean Case Size
-# Fonction modifiée
-# Fonction pour nettoyer et arrondir Case Size
-def clean_case_size(case_size):
-    if pd.isna(case_size) or case_size == 'Does not apply':
-        return np.nan
-    sizes = [float(s) for s in str(case_size).replace('mm', '').split(',') if s.strip().replace('.', '', 1).isdigit()]
-    return round(np.mean(sizes), 2) if sizes else np.nan
+# Function to clean eBay smart watches data
+def clean_smart_watches_ebay(df):
+    # Function to clean Price
+    def clean_price(price):
+        if pd.isna(price):
+            return np.nan
+        price = str(price).replace(',', '').replace('$', '').replace('GBP', '').replace('US', '').replace('/ea', '').replace('AU', '').replace('EUR', '').strip()
+        try:
+            return float(price)
+        except ValueError:
+            return np.nan
 
+    df['Price'] = df['Price'].apply(clean_price)
+    price_imputer = SimpleImputer(strategy='median')
+    df['Price'] = price_imputer.fit_transform(df[['Price']])
 
-# Application de la fonction
-df['Case Size'] = df['Case Size'].apply(clean_case_size)
+    # Function to clean Case Size
+    def clean_case_size(case_size):
+        if pd.isna(case_size) or case_size == 'Does not apply':
+            return np.nan
+        sizes = [float(s) for s in str(case_size).replace('mm', '').split(',') if s.strip().replace('.', '', 1).isdigit()]
+        return round(np.mean(sizes), 2) if sizes else np.nan
 
-# Remplacement des NaN et arrondi final
-case_size_imputer = SimpleImputer(strategy='mean')
-df['Case Size'] = case_size_imputer.fit_transform(df[['Case Size']])
-df['Case Size'] = df['Case Size'].round(2)  # Arrondi après imputations
+    df['Case Size'] = df['Case Size'].apply(clean_case_size)
+    case_size_imputer = SimpleImputer(strategy='mean')
+    df['Case Size'] = case_size_imputer.fit_transform(df[['Case Size']])
+    df['Case Size'] = df['Case Size'].round(2)
 
-# Fonction de nettoyage et conversion en entier
-def clean_battery_capacity(capacity):
-    if pd.isna(capacity):  # Vérifie les valeurs manquantes
-        return np.nan
-    capacity = str(capacity).replace('mAh', '').strip()  # Suppression de 'mAh'
-    try:
-        return int(round(float(capacity)))  # Conversion en float, arrondi puis entier
-    except ValueError:
-        return np.nan
-df['Battery Capacity'] = df['Battery Capacity'].apply(clean_battery_capacity)
+    # Function to clean Battery Capacity
+    def clean_battery_capacity(capacity):
+        if pd.isna(capacity):
+            return np.nan
+        capacity = str(capacity).replace('mAh', '').strip()
+        try:
+            return int(round(float(capacity)))
+        except ValueError:
+            return np.nan
 
-# Remplacement des valeurs manquantes (NaN) avec la moyenne et conversion en entier
-battery_capacity_imputer = SimpleImputer(strategy='mean')  # Moyenne pour combler les NaN
-df['Battery Capacity'] = battery_capacity_imputer.fit_transform(df[['Battery Capacity']])
-df['Battery Capacity'] = df['Battery Capacity'].round(0).astype(int)
+    df['Battery Capacity'] = df['Battery Capacity'].apply(clean_battery_capacity)
+    battery_capacity_imputer = SimpleImputer(strategy='mean')
+    df['Battery Capacity'] = battery_capacity_imputer.fit_transform(df[['Battery Capacity']])
+    df['Battery Capacity'] = df['Battery Capacity'].round(0).astype(int)
 
-brands = ['Google', 'Apple', 'Samsung', 'Xiaomi', 'Fitbit', 'Garmin',
-          'Apple' , 'Samsung','Huawei','IOWODO','iPhone', 'Pebble','TOZO','Fossil','Amazfit','Ticwatch','Mobvoi',
-          'Verizon','COLMI','AICase','Haylou','HUAWEI','Honor','Xiaomi','Garmin','Fitbit','Fossil',
-          'Withings', 'Nothing', 'T-Mobile']
+    # Function to clean Brand
+    brands = ['Google', 'Apple', 'Samsung', 'Xiaomi', 'Fitbit', 'Garmin',
+              'Apple', 'Samsung', 'Huawei', 'IOWODO', 'iPhone', 'Pebble', 'TOZO', 'Fossil', 'Amazfit', 'Ticwatch', 'Mobvoi',
+              'Verizon', 'COLMI', 'AICase', 'Haylou', 'HUAWEI', 'Honor', 'Xiaomi', 'Garmin', 'Fitbit', 'Fossil',
+              'Withings', 'Nothing', 'T-Mobile']
 
-def clean_brand(brand, title):
+    def clean_brand(brand, title):
+        if pd.isna(brand) or brand == 'Does not apply':
+            for b in brands:
+                if b.lower() in title.lower():
+                    return b
+            return 'Unknown'
+        else:
+            match = process.extractOne(unidecode(str(brand)), brands)
+            return match[0] if match and match[1] >= 80 else 'Unknown'
 
-    if pd.isna(brand) or brand == 'Does not apply':  # Marque vide, invalide, ou non renseignée
-        for b in brands:
-            if b.lower() in title.lower():
-                return b  # Trouve une marque dans le titre
-        return 'Unknown'  # Si aucune correspondance
-    else:
-        # Sinon, nettoie et standardise la marque existante
-        match = process.extractOne(unidecode(str(brand)), brands)
-        return match[0] if match and match[1] >= 80 else 'Unknown'
+    df['Brand'] = df.apply(lambda row: clean_brand(row['Brand'], row['Title']), axis=1)
 
+    # Function to clean Model
+    models = list(df['Model'].dropna().unique())
 
-# Application
-df['Brand'] = df.apply(lambda row: clean_brand(row['Brand'], row['Title']), axis=1)
+    def clean_model(model):
+        if pd.isna(model) or model == 'Does not apply':
+            return 'Unknown'
+        match = process.extractOne(unidecode(str(model)), models)
+        return match[0] if match[1] >= 80 else 'Unknown'
 
+    df['Model'] = df['Model'].apply(clean_model)
 
-# Function to clean Model
-models = list(df['Model'].dropna().unique())
+    # Function to clean Operating System
+    os_list = ['Wear OS', 'Android Wear', 'Apple Watch OS', 'Tizen', 'LiteOS', 'Moto Watch OS', 'Pebble OS']
 
-def clean_model(model):
-    if pd.isna(model) or model == 'Does not apply':
-        return 'Unknown'
-    match = process.extractOne(unidecode(str(model)), models)
-    return match[0] if match[1] >= 80 else 'Unknown'
+    def clean_os(os):
+        if pd.isna(os):
+            return 'Unknown'
+        match = process.extractOne(unidecode(str(os)), os_list)
+        return match[0] if match[1] >= 80 else 'Unknown'
 
-df['Model'] = df['Model'].apply(clean_model)
+    df['Operating System'] = df['Operating System'].apply(clean_os)
 
-# Function to clean Operating System
-os_list = ['Wear OS', 'Android Wear', 'Apple Watch OS', 'Tizen', 'LiteOS', 'Moto Watch OS', 'Pebble OS']
+    # Function to clean Storage Capacity
+    def clean_storage_capacity(storage):
+        if pd.isna(storage):
+            return np.nan
+        storage = str(storage).replace('GB', '').replace('MB', '').strip()
+        try:
+            return float(storage) / 1024 if 'MB' in str(storage) else float(storage)
+        except ValueError:
+            return np.nan
 
-def clean_os(os):
-    if pd.isna(os):
-        return 'Unknown'
-    match = process.extractOne(unidecode(str(os)), os_list)
-    return match[0] if match[1] >= 80 else 'Unknown'
+    df['Storage Capacity'] = df['Storage Capacity'].apply(clean_storage_capacity)
+    storage_capacity_imputer = SimpleImputer(strategy='median')
+    df['Storage Capacity'] = storage_capacity_imputer.fit_transform(df[['Storage Capacity']])
 
-df['Operating System'] = df['Operating System'].apply(clean_os)
+    # Function to clean Title
+    def clean_title(title):
+        words_to_remove = [
+            "smart watch", "smartwatch", "watch", "fitness tracker", "activity tracker", "sports watch", "wristwatch",
+            "bluetooth", "gps", "wifi", "heart rate monitor", "blood pressure monitor", "waterproof", "ip67", "ip68",
+            "touch screen", "phone function", "sos", "sleep monitor", "pedometer", "for men", "for women", "men's",
+            "women's", "kids", "unisex", "new", "2024", "2025", "latest", "original", "brand new", "used", "mm", "gb",
+            "mah", "android", "ios", "lte", "cellular", "wifi", "bluetooth",
+            "amoled", "display", "screen", "flashlight", "compass", "military", "Women", "Good", "Very", "Modes", "Black", "White", "Silver",
+            "Gold", "Blue", "Red", "Green", "Pink", "Purple", "Yellow", "Orange", "Brown", "Gray", "Grey", "Beige", "Ivory", "Cream", "Copper", "Bronze",
+            "Coral", "Turquoise", "Aqua", "Lavender", "Lilac", "Indigo",
+            "Maroon", "Olive", "Mint", "Teal", "Navy", "Apricot", "Azure", "Lime", "Violet", "Peach", "Plum", "Tan", "Khaki", "Crimson", "Magenta",
+            "Salmon", "Charcoal", "Mauve", "Fuchsia", "Watches", "Watch", "Smart", "Smartwatch", "Fitness", "Tracker", "Activity", "Sports",
+            "Wristwatch", "Bluetooth", "Gps", "Wifi", "Heart", "Rate", "Monitor", "Blood", "Pressure", "Waterproof", "Ip67", "Ip68", "Touch",
+            "Screen", "Phone", "Function", "Sos", "Sleep", "Pedometer"
+        ]
+        for word in words_to_remove:
+            title = re.sub(rf'\b{word}\b', '', title, flags=re.IGNORECASE)
+        title = re.sub(r'1st Gen', 'I', title)
+        title = re.sub(r'\b[A-Z0-9]{5,}\b', '', title)
+        title = re.sub(r'\s+', ' ', title).strip()
+        return title
 
-# Function to clean Storage Capacity
-def clean_storage_capacity(storage):
-    if pd.isna(storage):
-        return np.nan
-    storage = str(storage).replace('GB', '').replace('MB', '').strip()
-    try:
-        return float(storage) / 1024 if 'MB' in str(storage) else float(storage)
-    except ValueError:
-        return np.nan
+    df['Title'] = df['Title'].apply(clean_title)
 
-df['Storage Capacity'] = df['Storage Capacity'].apply(clean_storage_capacity)
-storage_capacity_imputer = SimpleImputer(strategy='median')
-df['Storage Capacity'] = storage_capacity_imputer.fit_transform(df[['Storage Capacity']])
+    # Verify if there are still any missing values
+    print(df.isnull().sum())
+    df = df[df.apply(lambda row: list(row).count('Unknown') < 2, axis=1)]
 
-def clean_title(title):
-    # Supprimer des mots inutiles ou non pertinents
-    words_to_remove = [
-        "smart watch", "smartwatch", "watch", "fitness tracker", "activity tracker", "sports watch", "wristwatch",
-        "bluetooth", "gps", "wifi", "heart rate monitor", "blood pressure monitor", "waterproof", "ip67", "ip68",
-        "touch screen", "phone function", "sos", "sleep monitor", "pedometer", "for men", "for women", "men's",
-        "women's", "kids", "unisex", "new", "2024", "2025", "latest", "original", "brand new", "used", "mm", "gb",
-        "mah", "android", "ios" "lte", "cellular", "wifi", "bluetooth",
-        "amoled", "display", "screen", "flashlight", "compass", "military","Women","Good","Very","Modes","Black","White","Silver",
-        "Gold","Blue","Red","Green","Pink","Purple","Yellow","Orange","Brown","Gray","Grey","Beige","Ivory","Cream","Copper","Bronze",
-        "Coral","Turquoise","Aqua","Lavender","Lilac","Indigo",
-        "Maroon","Olive","Mint","Teal","Navy","Apricot","Azure","Lime","Violet","Peach","Plum","Tan","Khaki","Crimson","Magenta",
-        "Salmon","Charcoal","Mauve","Fuchsia","Watches","Watch","Smart","Smartwatch","Fitness","Tracker","Activity","Sports",
-        "Wristwatch","Bluetooth","Gps","Wifi","Heart","Rate","Monitor","Blood","Pressure","Waterproof","Ip67","Ip68","Touch",
-        "Screen","Phone","Function","Sos","Sleep","Pedometer"
-    ]
-    for word in words_to_remove:
-        title = re.sub(rf'\b{word}\b', '', title, flags=re.IGNORECASE)
+    # Function to remove duplicates
+    def remove_duplicates(df, subset_columns, price_column='Price'):
+        df = df.sort_values(by=price_column, ascending=True)
+        df = df.drop_duplicates(subset=subset_columns, keep='first')
+        return df
 
-    # Normaliser les générations
-    title = re.sub(r'1st Gen', 'I', title)
+    subset_columns = ['Brand', 'Model', 'Storage Capacity', 'Case Size', 'Battery Capacity']
+    df = remove_duplicates(df, subset_columns)
 
-    # Supprimer les codes produits (séquences de 5 caractères et plus en majuscule/chiffres)
-    title = re.sub(r'\b[A-Z0-9]{5,}\b', '', title)
-
-    # Supprimer les espaces superflus
-    title = re.sub(r'\s+', ' ', title).strip()
-
-    return title
-
-
-df['Title'] = df['Title'].apply(clean_title)
-
-# Verify if there are still any missing values
-print(df.isnull().sum())
-df = df[df.apply(lambda row: list(row).count('Unknown') < 2, axis=1)]
-
-def remove_duplicates(df, subset_columns, price_column='Price'):
-
-    df = df.sort_values(by=price_column, ascending=True)
-    # Supprimer les doublons en gardant le premier (celui avec le prix minimum)
-    df = df.drop_duplicates(subset=subset_columns, keep='first')
     return df
 
-subset_columns = ['Brand', 'Model', 'Storage Capacity', 'Case Size', 'Battery Capacity']
-
-# Suppression des doublons
-df = remove_duplicates(df, subset_columns)
-
-output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_watch1.csv'
-df.to_csv(output_path, index=False)
-
-print("Data cleaning completed successfully.")
-
-
-
-
+# Function to clean Ubuy smart watches data
 def clean_smartwatch_data(df):
     # Mapping des colonnes
     column_mapping = {
@@ -229,16 +220,31 @@ def clean_smartwatch_data(df):
     # Conversion des types de données
     df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
 
-
     # Suppression des doublons exacts
     df = df.drop_duplicates()
 
     return df.reset_index(drop=True)
 
+# Process eBay smart watches
+try:
+    for file in RAW_DATA_DIR_EBAY.glob('*.csv'):
+        print(f"Processing eBay file: {file}")
+        df_ebay = pd.read_csv(file)
+        cleaned_df_ebay = clean_smart_watches_ebay(df_ebay)
+        output_filename = CLEANED_DATA_DIR_EBAY / f"{file.stem}_cleaned.csv"
+        cleaned_df_ebay.to_csv(output_filename, index=False)
+        print(f"Cleaned data saved to {output_filename}")
+except Exception as e:
+    print(f"An error occurred while processing eBay data: {e}")
 
-# Utilisation
-input_file_ubuy = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ubuy\smart_watches\smart_watches_2025_01_30_scrape1.csv'
-
-df = pd.read_csv(input_file_ubuy)
-cleaned_df = clean_smartwatch_data(df)
-cleaned_df.to_csv('cleaned_smartwatches.csv', index=False)
+# Process Ubuy smart watches
+try:
+    for file in RAW_DATA_DIR_UBUY.glob('*.csv'):
+        print(f"Processing Ubuy file: {file}")
+        df_ubuy = pd.read_csv(file)
+        cleaned_df_ubuy = clean_smartwatch_data(df_ubuy)
+        output_filename = CLEANED_DATA_DIR_UBUY / f"{file.stem}_cleaned.csv"
+        cleaned_df_ubuy.to_csv(output_filename, index=False)
+        print(f"Cleaned data saved to {output_filename}")
+except Exception as e:
+    print(f"An error occurred while processing Ubuy data: {e}")
