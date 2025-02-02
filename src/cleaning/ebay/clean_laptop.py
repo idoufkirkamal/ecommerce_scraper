@@ -2,17 +2,31 @@ import os
 import pandas as pd
 import numpy as np
 import re
-file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\laptops_2025_01_29_scrape1.csv'
-df = pd.read_csv(file_path)
+from pathlib import Path
 
-# Définir le chemin d'enregistrement
-output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_laptop1.csv'
-output_dir = os.path.dirname(output_path)
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)  # Crée les d
-df = pd.read_csv(file_path)
+# Define paths using relative paths
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Root folder of the project
+RAW_DATA_DIR = BASE_DIR / 'data' / 'raw' / 'ebay' / 'laptops'
+CLEANED_DATA_DIR = BASE_DIR / 'data' / 'cleaned' / 'ebay' / 'laptops'
 
+# Ensure the cleaned data directory exists
+CLEANED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# Debugging: Print paths
+print(f"Base directory: {BASE_DIR}")
+print(f"Raw data directory: {RAW_DATA_DIR}")
+print(f"Cleaned data directory: {CLEANED_DATA_DIR}")
+
+# Check if raw data directory exists
+if not RAW_DATA_DIR.exists():
+    raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR}")
+
+# Check if there are CSV files to process
+files = list(RAW_DATA_DIR.glob('*.csv'))
+if not files:
+    print(f"No CSV files found in {RAW_DATA_DIR}")
+else:
+    print(f"Found {len(files)} CSV files to process")
 
 # 2. Nettoyer la colonne Price
 def clean_price(price):
@@ -25,10 +39,6 @@ def clean_price(price):
                 cleaned = parts[0] + '.' + ''.join(parts[1:])
         return float(cleaned) if cleaned else np.nan
     return price
-
-
-df['Price'] = df['Price'].apply(clean_price)
-
 
 # 3. Uniformisation des colonnes
 def convert_to_gb(value):
@@ -46,37 +56,22 @@ def convert_to_gb(value):
         return num
     return np.nan
 
-
-for col in ['RAM', 'Storage']:
-    df[col] = df[col].apply(convert_to_gb).astype(float)
-
-df['Screen Size'] = df['Screen Size'].str.extract(r'(\d+\.?\d*)').astype(float)
-
 # 4. Imputation des valeurs manquantes
-imputation_rules = {
-    'RAM': 'median',
-    'Storage': 'median',
-    'Screen Size': 'median',
-    'CPU': 'ffill',
-    'Price': 'median'
-}
+def impute_missing_values(df):
+    imputation_rules = {
+        'RAM': 'median',
+        'Storage': 'median',
+        'Screen Size': 'median',
+        'CPU': 'ffill',
+        'Price': 'median'
+    }
 
-for col, method in imputation_rules.items():
-    if method == 'median':
-        # Remplacer inplace par une affectation explicite
-        df[col] = df[col].fillna(df[col].median())
-    elif method == 'ffill':
-        # Remplacer inplace par une méthode d'affectation explicite
-        df[col] = df[col].ffill()
-
-# Nettoyage spécifique pour la colonne GPU
-# Remplacer les valeurs NaN par une valeur par défaut (e.g., "Unknown")
-df['GPU'] = df['GPU'].fillna('Unknown')
-
-df['GPU'] = df['GPU'].fillna('Unknown Graphics')
-
-
-
+    for col, method in imputation_rules.items():
+        if method == 'median':
+            df[col] = df[col].fillna(df[col].median())
+        elif method == 'ffill':
+            df[col] = df[col].ffill()
+    return df
 
 # 5. Nettoyer les titres
 def clean_title(title):
@@ -91,19 +86,7 @@ def clean_title(title):
         str(title)
     ).strip().replace('  ', '')
 
-
-df['Title'] = df['Title'].apply(clean_title)
-# Corrige la condition pour la colonne 'Model'
-df['Model'] = df['Model'].replace('', np.nan)  # Remplacer '' par NaN pour uniformité
-df['Model'] = df['Model'].fillna(df['Title'])  # Remplacer les NaN dans 'Model' par les valeurs de 'Title'
-
-# 6. Conversion finale du stockage en GB
-df['Storage'] = df['Storage'].round(2)
-
-# Sauvegarder le résultat
-df = df[df['Price'] >= 90]
-
-
+# 6. Supprimer les doublons en conservant le prix minimum
 def remove_duplicates_keep_min_price(df):
     # Convertir la colonne Price en numérique si ce n'est pas déjà fait
     df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
@@ -111,14 +94,34 @@ def remove_duplicates_keep_min_price(df):
     key_columns = ['Model', 'RAM', 'CPU', 'Brand', 'Storage']
     df = df.sort_values(by='Price', ascending=True)
     df_cleaned = df.drop_duplicates(subset=key_columns, keep='first')
-
     return df_cleaned
 
+# Process all CSV files in the raw data directory
+try:
+    for file in RAW_DATA_DIR.glob('*.csv'):
+        print(f"Processing file: {file}")
+        df = pd.read_csv(file)
+        print(f"Loaded {len(df)} rows from {file.name}")
+        print(f"Columns in the file: {df.columns.tolist()}")  # Debugging: Print column names
 
-df = remove_duplicates_keep_min_price(df)
+        # Appliquer les fonctions pour nettoyer et normaliser les données
+        df['Price'] = df['Price'].apply(clean_price)
+        for col in ['RAM', 'Storage']:
+            df[col] = df[col].apply(convert_to_gb).astype(float)
+        df['Screen Size'] = df['Screen Size'].str.extract(r'(\d+\.?\d*)').astype(float)
+        df = impute_missing_values(df)
+        df['GPU'] = df['GPU'].fillna('Unknown Graphics')
+        df['Title'] = df['Title'].apply(clean_title)
+        df['Model'] = df['Model'].replace('', np.nan)  # Remplacer '' par NaN pour uniformité
+        df['Model'] = df['Model'].fillna(df['Title'])  # Remplacer les NaN dans 'Model' par les valeurs de 'Title'
+        df['Storage'] = df['Storage'].round(2)
+        df = df[df['Price'] >= 90]
+        df = remove_duplicates_keep_min_price(df)
 
-output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_laptop1.csv'
-df.to_csv(output_path, index=False)
-
-print("Nettoyage terminé ! Fichier sauvegardé sous : laptops_clean_2025-01-28.csv")
-print(f"Shape final : {df.shape}")
+        # Sauvegarder le DataFrame nettoyé dans un nouveau fichier CSV
+        output_filename = CLEANED_DATA_DIR / f"{file.stem}_cleaned.csv"
+        df.to_csv(output_filename, index=False)
+        print(f"Cleaned data saved to {output_filename}")
+        print(f"Shape final : {df.shape}")
+except Exception as e:
+    print(f"An error occurred: {e}")
