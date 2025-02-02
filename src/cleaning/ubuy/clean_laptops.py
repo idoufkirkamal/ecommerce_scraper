@@ -1,9 +1,30 @@
 import pandas as pd
 import re
+from pathlib import Path
 
-import pandas as pd
-import pandas as pd
-import re
+# Define paths using relative paths
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Root folder of the project
+RAW_DATA_DIR = BASE_DIR / 'data' / 'raw' / 'ubuy' / 'laptops'
+CLEANED_DATA_DIR = BASE_DIR / 'data' / 'cleaned' / 'ubuy' / 'laptops'
+
+# Ensure the cleaned data directory exists
+CLEANED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# Debugging: Print paths
+print(f"Base directory: {BASE_DIR}")
+print(f"Raw data directory: {RAW_DATA_DIR}")
+print(f"Cleaned data directory: {CLEANED_DATA_DIR}")
+
+# Check if raw data directory exists
+if not RAW_DATA_DIR.exists():
+    raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR}")
+
+# Check if there are CSV files to process
+files = list(RAW_DATA_DIR.glob('*.csv'))
+if not files:
+    print(f"No CSV files found in {RAW_DATA_DIR}")
+else:
+    print(f"Found {len(files)} CSV files to process")
 
 # Fonctions de nettoyage
 def clean_title(title):
@@ -18,8 +39,6 @@ def clean_title(title):
         str(title)
     ).strip().replace('  ', '')
 
-
-
 def clean_price(price):
     if not isinstance(price, str):
         return None
@@ -28,10 +47,12 @@ def clean_price(price):
         return float(price)
     except ValueError:
         return None
+
 def convert_to_usd(price_mad, exchange_rate=10):
     if price_mad is None:
         return None
     return round(price_mad / exchange_rate, 2)
+
 def clean_ram(ram):
     if not isinstance(ram, str):
         return None
@@ -40,12 +61,10 @@ def clean_ram(ram):
         return int(match.group(1))
     return None
 
-
 def clean_cpu(cpu):
     if pd.isna(cpu): return None
     cpu = re.sub(r'\d+\.\d+ GHz|GHz', '', str(cpu)).strip()
     return cpu if cpu else None
-
 
 def clean_model(title):
     models = ['Pavilion', 'IdeaPad', 'ThinkPad', 'ROG', 'Predator', 'Vostro']
@@ -55,11 +74,7 @@ def clean_model(title):
             return model
     return title.split()[0].strip()
 
-
-
-
 VALID_BRANDS = ["hp", "dell", "lenovo", "acer", "msi", "asus"]
-
 
 def clean_brand(title):
     brands = ['HP', 'Lenovo', 'Dell', 'ASUS', 'Acer', 'MSI', 'Alienware']
@@ -68,8 +83,6 @@ def clean_brand(title):
         if brand.lower() in title.lower():
             return brand
     return title.split()[0].strip()
-
-
 
 def clean_gpu(gpu):
     if not isinstance(gpu, str):
@@ -101,22 +114,30 @@ def clean_storage(storage):
             return int(match.group(1))
     return None
 
-# Charger les données
-df = pd.read_csv(r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ubuy\laptops\laptops_2025_01_30_scrape1.csv')
+# Process all CSV files in the raw data directory
+try:
+    for file in RAW_DATA_DIR.glob('*.csv'):
+        print(f"Processing file: {file}")
+        df = pd.read_csv(file)
 
-# Appliquer les fonctions de nettoyage
-df['Title'] = df['title'].apply(clean_title)
-df['Price'] = df['price'].apply(clean_price)
-df['Price'] = df['Price'].apply(convert_to_usd)
-df['RAM'] = df['Ram Memory Installed Size'].apply(clean_ram)
-df['CPU'] = df['CPU Model'].apply(clean_cpu)
-df['Model'] = df['title'].apply(clean_model)
-df['Brand'] = df['title'].apply(clean_brand)
-df['GPU'] = df['Graphics Coprocessor'].apply(clean_gpu)
-df['Screen Size'] = df['Screen Size'].apply(clean_screen_size)
-df['Storage'] = df['Hard Disk Size'].apply(clean_storage)
+        # Appliquer les fonctions de nettoyage
+        df['Title'] = df['title'].apply(clean_title)
+        df['Price'] = df['price'].apply(clean_price)
+        df['Price'] = df['Price'].apply(convert_to_usd)
+        df['RAM'] = df['Ram Memory Installed Size'].apply(clean_ram)
+        df['CPU'] = df['CPU Model'].apply(clean_cpu)
+        df['Model'] = df['title'].apply(clean_model)
+        df['Brand'] = df['title'].apply(clean_brand)
+        df['GPU'] = df['Graphics Coprocessor'].apply(clean_gpu)
+        df['Screen Size'] = df['Screen Size'].apply(clean_screen_size)
+        df['Storage'] = df['Hard Disk Size'].apply(clean_storage)
 
-cleaned_df = df[['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage']]
+        # Sélectionner les colonnes nécessaires
+        cleaned_df = df[['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage']]
 
-
-cleaned_df.to_csv(r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ubuy\cleaned_laptops.csv', index=False)
+        # Sauvegarder le résultat nettoyé
+        output_filename = CLEANED_DATA_DIR / f"{file.stem}_cleaned.csv"
+        cleaned_df.to_csv(output_filename, index=False)
+        print(f"Cleaned data saved to {output_filename}")
+except Exception as e:
+    print(f"An error occurred: {e}")

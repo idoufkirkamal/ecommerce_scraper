@@ -2,11 +2,31 @@ import numpy as np
 import pandas as pd
 import re
 from fuzzywuzzy import process
+from pathlib import Path
 
-file_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\raw\ebay\graphics_cards_2025_01_29_scrape1.csv'
-df = pd.read_csv(file_path)
+# Define paths using relative paths
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Root folder of the project
+RAW_DATA_DIR = BASE_DIR / 'data' / 'raw' / 'ebay' / 'graphics_cards'
+CLEANED_DATA_DIR = BASE_DIR / 'data' / 'cleaned' / 'ebay' / 'graphics_cards'
 
+# Ensure the cleaned data directory exists
+CLEANED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# Debugging: Print paths
+print(f"Base directory: {BASE_DIR}")
+print(f"Raw data directory: {RAW_DATA_DIR}")
+print(f"Cleaned data directory: {CLEANED_DATA_DIR}")
+
+# Check if raw data directory exists
+if not RAW_DATA_DIR.exists():
+    raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR}")
+
+# Check if there are CSV files to process
+files = list(RAW_DATA_DIR.glob('*.csv'))
+if not files:
+    print(f"No CSV files found in {RAW_DATA_DIR}")
+else:
+    print(f"Found {len(files)} CSV files to process")
 
 # Fonction pour nettoyer les titres
 def clean_title(row):
@@ -37,7 +57,6 @@ def clean_title(row):
     clean_name = re.sub(r"\s+", " ", clean_name)
 
     # Inclure le modèle de GPU et la marque
-    # Prioriser les données fiables des colonnes
     if gpu_model.lower() in clean_name and brand.lower() in clean_name:
         return f"{brand} {gpu_model}"
     elif gpu_model.lower() in clean_name:
@@ -45,99 +64,87 @@ def clean_title(row):
     elif brand.lower() in clean_name:
         return f"{brand} {clean_name}"
     else:
-        # Dernier recours - combiner marque et modèle
         return f"{brand} {gpu_model}" if brand != "nan" else gpu_model
 
-
-# Appliquer la fonction à chaque ligne
-df['Cleaned Title'] = df.apply(clean_title, axis=1)
-
 # 3. Corriger les marques avec fuzzy matching
-brands = df['Brand'].dropna().unique().tolist()
-brand_mapping = {}
-for brand in df['Brand']:
-    if pd.isna(brand): continue
-    match, score = process.extractOne(brand, brands)
-    brand_mapping[brand] = match if score > 85 else brand
-df['Brand'] = df['Brand'].replace(brand_mapping)
-
+def correct_brands(df):
+    brands = df['Brand'].dropna().unique().tolist()
+    brand_mapping = {}
+    for brand in df['Brand']:
+        if pd.isna(brand): continue
+        match, score = process.extractOne(brand, brands)
+        brand_mapping[brand] = match if score > 85 else brand
+    df['Brand'] = df['Brand'].replace(brand_mapping)
+    return df
 
 # 4. Normaliser les prix
-
 def clean_price(price):
     if isinstance(price, str):
-        # Supprimer tout sauf les chiffres, les virgules et les points
         price = re.sub(r'[^\d.,]', '', price)
-        # Si une virgule est suivie d'un point ou l'inverse, corriger une éventuelle confusion
         if ',' in price and '.' in price:
             if price.index(',') < price.index('.'):
-                price = price.replace(',', '')  # Suppression des virgules dans les formats comme "1,234.56"
+                price = price.replace(',', '')
             else:
-                price = price.replace('.', '').replace(',', '.')  # Conversion des formats européens "1.234,56"
+                price = price.replace('.', '').replace(',', '.')
         else:
-            price = price.replace(',', '.')  # Remplacement simple des virgules par des points pour les décimales
+            price = price.replace(',', '.')
     return float(price) if price else None
-
-
-# Appliquer la transformation sur la colonne 'Price'
-df['Price'] = df['Price'].apply(clean_price)
-
 
 # 5. Normaliser la mémoire
 def convert_to_gb(value):
-    # Vérifie si la valeur est manquante ou nulle
     if pd.isna(value) or value.strip() == '':
-        return None  # Retourne une valeur nulle si la donnée est absente
+        return None
     try:
-        # Conversion spécifique pour les valeurs exprimées en MB
         if 'MB' in value.upper():
             return float(value.upper().replace('MB', '').strip()) / 1024
-        # Conversion standard en traitant les caractères non numériques
         return float(re.sub(r'[^\d.]', '', value))
     except ValueError:
-        return None  # Retourne une valeur nulle si la conversion échoue
-
-
-df['Memory Size'] = df['Memory Size'].astype(str).apply(convert_to_gb)
-
+        return None
 
 # 6. Imputation des valeurs manquantes
-# Fonction pour remplir les valeurs manquantes ou groupe entièrement vide
 def fill_with_median_or_default(series):
-    if series.notna().any():  # Vérifie qu'il y a au moins une valeur valide
+    if series.notna().any():
         return series.fillna(series.median())
     else:
-        return series.fillna(0)  # Remplace les groupes vides par 0 (ou autre valeur)
+        return series.fillna(0)
 
-
-df['Memory Size'] = df.groupby('Chipset/GPU Model')['Memory Size'].transform(fill_with_median_or_default)
-df['Price'] = df.groupby('Chipset/GPU Model')['Price'].transform(fill_with_median_or_default)
-# Function to fill missing values with the mode
 def fill_with_mode(series):
     if series.notna().any():
         return series.fillna(series.mode()[0])
     else:
         return series
 
-# Apply the function to 'Memory Type' and 'Connectors' columns
-df['Memory Type'] = df.groupby('Chipset/GPU Model')['Memory Type'].transform(fill_with_mode)
-df['Connectors'] = df.groupby('Chipset/GPU Model')['Connectors'].transform(fill_with_mode)
-
-# Supprimer les doublons en conservant la ligne avec le prix minimum
+# 7. Supprimer les doublons en conservant la ligne avec le prix minimum
 def remove_duplicates_with_min_price(df):
-    columns_for_duplicates = [ 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model']
+    columns_for_duplicates = ['Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model']
     idx_min_price = df.groupby(columns_for_duplicates)['Price'].idxmin()
     return df.loc[idx_min_price].reset_index(drop=True)
 
+# Process all CSV files in the raw data directory
+try:
+    for file in RAW_DATA_DIR.glob('*.csv'):
+        print(f"Processing file: {file}")
+        df = pd.read_csv(file)
+        print(f"Loaded {len(df)} rows from {file.name}")
+        print(f"Columns in the file: {df.columns.tolist()}")
 
-# Appliquer cette méthode à votre DataFrame
-df = remove_duplicates_with_min_price(df)
+        # Appliquer les fonctions pour nettoyer et normaliser les données
+        df['Cleaned Title'] = df.apply(clean_title, axis=1)
+        df = correct_brands(df)
+        df['Price'] = df['Price'].apply(clean_price)
+        df['Memory Size'] = df['Memory Size'].astype(str).apply(convert_to_gb)
+        df['Memory Size'] = df.groupby('Chipset/GPU Model')['Memory Size'].transform(fill_with_median_or_default)
+        df['Price'] = df.groupby('Chipset/GPU Model')['Price'].transform(fill_with_median_or_default)
+        df['Memory Type'] = df.groupby('Chipset/GPU Model')['Memory Type'].transform(fill_with_mode)
+        df['Connectors'] = df.groupby('Chipset/GPU Model')['Connectors'].transform(fill_with_mode)
+        df = remove_duplicates_with_min_price(df)
 
+        # Validation des données
+        df = df[(df['Price'] > 0) & (df['Memory Size'] > 0.1)]
 
-
-# 8. Validation des données
-df = df[(df['Price'] > 0) & (df['Memory Size'] > 0.1)]
-
-# 9. Sauvegarder
-output_path = r'C:\Users\AdMin\Desktop\ecommerce_scraper\data\cleaned\ebay\cleaned_gpu1.csv'
-df.to_csv(output_path, index=False)
+        # Sauvegarder le DataFrame nettoyé dans un nouveau fichier CSV
+        output_filename = CLEANED_DATA_DIR / f"{file.stem}_cleaned.csv"
+        df.to_csv(output_filename, index=False)
+        print(f"Cleaned data saved to {output_filename}")
+except Exception as e:
+    print(f"An error occurred: {e}")
