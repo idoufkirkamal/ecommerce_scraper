@@ -57,10 +57,8 @@ def clean_memory_size(memory_ram, graphics_card_ram_size, title):
             value = re.sub(r'[^\d]', '', value)
             return value.strip()
         return None
-
     memory_ram = sanitize(memory_ram)
     graphics_card_ram_size = sanitize(graphics_card_ram_size)
-
     try:
         if memory_ram:
             return int(memory_ram)
@@ -106,7 +104,6 @@ def clean_title(row):
     gpu_model = str(row.get("Chipset/GPU Model", "")).strip() if pd.notna(row.get("Chipset/GPU Model", "")) else None
     brand = str(row.get("Brand", "")).strip() if pd.notna(row.get("Brand", "")) else None
     title = str(row.get("title", "")).strip().lower() if pd.notna(row.get("title", "")) else ""
-
     unwanted_terms = [
         r'\bnew\b', r'\bused\b', r'\bgraphics\b', r'\bcard\b', r'\bgpu\b', r'\bvideo\b', r'\bhdmi\b', r'\bvga\b',
         r'\bdvi\b', r'\bdisplayport\b', r'\bminidisplayport\b', r'\busb-c\b', r'\boc\b', r'\bgddr5\b', r'\bgddr6\b',
@@ -118,14 +115,11 @@ def clean_title(row):
         r'\bversion\b', r'\bgen\b', r'\bpcie\b', r'\bexpress\b', r'\bslot\b', r'\bconnector\b',
         r'\binterface\b', r'\bdual\b', r'\bsingle\b', r'\btriple\b', r'\bquad\b', r'\bhex\b'
     ]
-
     clean_name = title
     for term in unwanted_terms:
         clean_name = re.sub(term, "", clean_name)
-
     clean_name = re.sub(r"[^a-zA-Z0-9\s]", "", clean_name).strip()
     clean_name = re.sub(r"\s+", " ", clean_name)
-
     if gpu_model and gpu_model.lower() in clean_name and brand and brand.lower() in clean_name:
         return f"{brand} {gpu_model}"
     elif gpu_model and gpu_model.lower() in clean_name:
@@ -140,7 +134,6 @@ try:
     for file in RAW_DATA_DIR.glob('*.csv'):
         print(f"Processing file: {file}")
         df = pd.read_csv(file)
-
         # Apply cleaning functions
         df['Price'] = df['price'].apply(clean_price)
         df['Price'] = df['Price'].apply(convert_to_usd)
@@ -193,9 +186,10 @@ try:
         # Drop rows where Memory Size is still NaN
         df.dropna(subset=['Memory Size'], inplace=True)
 
-        # Keep only necessary columns
-        columns_to_keep = ['Title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors']
-        df_cleaned = df[columns_to_keep]
+        # Keep only necessary columns (including Collection Date)
+        columns_to_keep = ['Title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
+        existing_columns = [col for col in columns_to_keep if col in df.columns]
+        df_cleaned = df[existing_columns]
 
         # Save cleaned data
         output_filename = CLEANED_DATA_DIR / f"{file.stem}_cleaned.csv"

@@ -246,10 +246,10 @@ if __name__ == "__main__":
     try:
         logging.info("Starting script...")
         categories = {
-            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 6),
-            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 6),
-            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 6),
-            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 6)
+            "graphics_cards": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=graphics+cards", 8),
+            "laptops": ("https://www.ubuy.ma/en/category/laptops-21457", 8),
+            "monitors": ("https://www.ubuy.ma/en/search/?q=computer%20monitor", 8),
+            "smart_watches": ("https://www.ubuy.ma/en/search/?ref_p=ser_tp&q=smart+watch", 8)
         }
 
         for category, (base_url, max_pages) in categories.items():
