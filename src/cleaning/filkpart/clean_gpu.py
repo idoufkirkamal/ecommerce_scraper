@@ -27,33 +27,40 @@ if not files:
 else:
     print(f"Found {len(files)} CSV files to process")
 
-# Fonction pour nettoyer le prix
-def clean_price(price):
+# Exchange rate for INR to USD
+EXCHANGE_RATE_INR_TO_USD = 83  # Update this value as needed
+
+# Function to clean the price and convert it to USD
+def clean_price_and_convert_to_usd(price):
     if pd.isna(price) or price == 'Data not available':
         return None
-    return int(re.sub(r'[^\d]', '', price))
+    # Remove non-numeric characters and convert to integer
+    price_inr = int(re.sub(r'[^\d]', '', price))
+    # Convert INR to USD
+    price_usd = round(price_inr / EXCHANGE_RATE_INR_TO_USD, 2)
+    return price_usd
 
-# Fonction pour extraire la taille de la mémoire
+# Function to extract the memory size
 def extract_memory_size(memory):
     if pd.isna(memory) or memory == 'Data not available':
         return None
     match = re.search(r'(\d+) GB', memory)
     return int(match.group(1)) if match else None
 
-# Fonction pour extraire le type de mémoire
+# Function to extract the memory type
 def extract_memory_type(memory):
     if pd.isna(memory) or memory == 'Data not available':
         return None
     match = re.search(r'\d+ GB (\w+)', memory)
     return match.group(1) if match else None
 
-# Fonction pour extraire le chipset/GPU model
+# Function to extract the chipset/GPU model
 def extract_gpu_model(model_id):
     if pd.isna(model_id) or model_id == 'Data not available':
         return None
     return model_id
 
-# Fonction pour extraire les connecteurs
+# Function to extract connectors
 def extract_connectors(dvi_hmdi_interface):
     if pd.isna(dvi_hmdi_interface) or dvi_hmdi_interface == 'Data not available':
         return None
@@ -70,7 +77,7 @@ def extract_connectors(dvi_hmdi_interface):
         connectors.append('VGA')
     return ', '.join(connectors) if connectors else None
 
-# Étape 3: Extraire les informations manquantes
+# Extract missing data
 def extract_missing_data(df):
     df['Memory Size'] = df['Memory'].apply(extract_memory_size)
     df['Memory Type'] = df['Memory'].apply(extract_memory_type)
@@ -78,16 +85,17 @@ def extract_missing_data(df):
     df['Connectors'] = df['DVI and HDMI Interface'].apply(extract_connectors)
     return df
 
-# Étape 4: Supprimer les colonnes inutiles
+# Drop unnecessary columns
 def drop_unnecessary_columns(df):
-    columns_to_keep = ['title', 'price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors']
+    # Add 'collection_date' to the list of columns to keep
+    columns_to_keep = ['title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'collection_date']
     existing_columns = [col for col in columns_to_keep if col in df.columns]
     return df[existing_columns]
 
-# Étape 5: Gérer les valeurs manquantes
+# Handle missing values
 def fill_missing_values(df):
     if 'price' in df.columns:
-        df.loc[:, 'Price'] = df['price'].apply(clean_price)
+        df.loc[:, 'Price'] = df['price'].apply(clean_price_and_convert_to_usd)  # Convert price to USD
     if 'Brand' in df.columns:
         df.loc[:, 'Brand'] = df['Brand'].fillna('Unknown')
     if 'Memory Size' in df.columns:
@@ -100,28 +108,36 @@ def fill_missing_values(df):
         df.loc[:, 'Connectors'] = df['Connectors'].fillna('Unknown')
     return df
 
-# Étape 6: Sauvegarder le DataFrame nettoyé
+# Save cleaned data
 def save_cleaned_data(df, filename):
     df.to_csv(filename, index=False)
 
-# Supprimer les colonnes avec exactement trois valeurs 'Unknown'
+# Remove rows with exactly three 'Unknown' values
 def remove_rows_with_three_unknowns(df):
     unknown_counts = df.isin(['Unknown']).sum(axis=1)
     return df[unknown_counts < 3]
 
+# Rename and drop the original price column
 def rename_and_drop_price_column(df):
     if 'price' in df.columns:
-        df.rename(columns={'price': 'Price'}, inplace=True)
+        df.drop(columns=['price'], inplace=True)  # Drop the old price column
     return df
 
-# Nettoyage complet des données
+# Rename the 'collection_date' column to 'Collection Date'
+def rename_collection_date_column(df):
+    if 'collection_date' in df.columns:
+        df.rename(columns={'collection_date': 'Collection Date'}, inplace=True)
+    return df
+
+# Full data cleaning pipeline
 def clean_data(df):
     df = df.copy()
     df = extract_missing_data(df)
-    df = drop_unnecessary_columns(df)
-    df = fill_missing_values(df)
+    df = fill_missing_values(df)  # Convert price to USD here
     df = remove_rows_with_three_unknowns(df)
-    df = rename_and_drop_price_column(df)
+    df = rename_and_drop_price_column(df)  # Drop the old price column
+    df = drop_unnecessary_columns(df)
+    df = rename_collection_date_column(df)  # Rename 'collection_date' to 'Collection Date'
     return df
 
 # Process all CSV files in the raw data directory
