@@ -3,7 +3,6 @@ beautifulsoup4~=4.12.3
 selenium
 pandas~=2.2.3
 matplotlib
-flask
 schedule
 
 fake-useragent~=2.0.3
