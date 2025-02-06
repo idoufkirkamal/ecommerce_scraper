@@ -28,13 +28,13 @@ if not files:
 else:
     print(f"Found {len(files)} CSV files to process")
 
-# Fonction pour nettoyer les titres
+# Function to clean titles
 def clean_title(row):
-    # Utiliser comme base le modèle de GPU et la marque
+    # Use GPU model and brand as the base
     gpu_model = str(row["Chipset/GPU Model"]).strip()
     brand = str(row["Brand"]).strip()
 
-    # Liste de termes inutiles à supprimer
+    # List of unwanted terms to remove
     unwanted_terms = [
         r'\bnew\b', r'\bused\b', r'\bgraphics\b', r'\bcard\b', r'\bgpu\b', r'\bvideo\b', r'\bhdmi\b', r'\bvga\b',
         r'\bdvi\b', r'\bdisplayport\b', r'\bminidisplayport\b', r'\busb-c\b', r'\boc\b', r'\bgddr5\b', r'\bgddr6\b',
@@ -47,16 +47,16 @@ def clean_title(row):
         r'\binterface\b', r'\bdual\b', r'\bsingle\b', r'\btriple\b', r'\bquad\b', r'\bhex\b', r'\boct\b', r'\bcore\b',
     ]
 
-    # Nettoyer le titre original
+    # Clean the original title
     clean_name = row['Title'].lower()
     for term in unwanted_terms:
         clean_name = re.sub(term, "", clean_name)
 
-    # Supprimer multiples espaces et caractères spéciaux
+    # Remove multiple spaces and special characters
     clean_name = re.sub(r"[^a-zA-Z0-9\s]", "", clean_name).strip()
     clean_name = re.sub(r"\s+", " ", clean_name)
 
-    # Inclure le modèle de GPU et la marque
+    # Include GPU model and brand
     if gpu_model.lower() in clean_name and brand.lower() in clean_name:
         return f"{brand} {gpu_model}"
     elif gpu_model.lower() in clean_name:
@@ -66,7 +66,7 @@ def clean_title(row):
     else:
         return f"{brand} {gpu_model}" if brand != "nan" else gpu_model
 
-# 3. Corriger les marques avec fuzzy matching
+# Correct brands using fuzzy matching
 def correct_brands(df):
     brands = df['Brand'].dropna().unique().tolist()
     brand_mapping = {}
@@ -77,7 +77,7 @@ def correct_brands(df):
     df['Brand'] = df['Brand'].replace(brand_mapping)
     return df
 
-# 4. Normaliser les prix
+# Normalize prices
 def clean_price(price):
     if isinstance(price, str):
         price = re.sub(r'[^\d.,]', '', price)
@@ -90,7 +90,7 @@ def clean_price(price):
             price = price.replace(',', '.')
     return float(price) if price else None
 
-# 5. Normaliser la mémoire
+# Normalize memory size
 def convert_to_gb(value):
     if pd.isna(value) or value.strip() == '':
         return None
@@ -101,7 +101,7 @@ def convert_to_gb(value):
     except ValueError:
         return None
 
-# 6. Imputation des valeurs manquantes
+# Impute missing values
 def fill_with_median_or_default(series):
     if series.notna().any():
         return series.fillna(series.median())
@@ -114,11 +114,23 @@ def fill_with_mode(series):
     else:
         return series
 
-# 7. Supprimer les doublons en conservant la ligne avec le prix minimum
+# Remove duplicates by keeping the row with the minimum price
 def remove_duplicates_with_min_price(df):
     columns_for_duplicates = ['Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model']
     idx_min_price = df.groupby(columns_for_duplicates)['Price'].idxmin()
     return df.loc[idx_min_price].reset_index(drop=True)
+
+# Drop unnecessary columns and keep only the required ones
+def drop_unnecessary_columns(df):
+    columns_to_keep = ['title', 'Price', 'Brand', 'Memory Size', 'Memory Type', 'Chipset/GPU Model', 'Connectors', 'Collection Date']
+    existing_columns = [col for col in columns_to_keep if col in df.columns]
+    return df[existing_columns]
+
+# Rename the 'Cleaned Title' column to 'title'
+def rename_cleaned_title_column(df):
+    if 'Cleaned Title' in df.columns:
+        df.rename(columns={'Cleaned Title': 'title'}, inplace=True)
+    return df
 
 # Process all CSV files in the raw data directory
 try:
@@ -128,7 +140,7 @@ try:
         print(f"Loaded {len(df)} rows from {file.name}")
         print(f"Columns in the file: {df.columns.tolist()}")
 
-        # Appliquer les fonctions pour nettoyer et normaliser les données
+        # Apply cleaning functions
         df['Cleaned Title'] = df.apply(clean_title, axis=1)
         df = correct_brands(df)
         df['Price'] = df['Price'].apply(clean_price)
@@ -139,10 +151,20 @@ try:
         df['Connectors'] = df.groupby('Chipset/GPU Model')['Connectors'].transform(fill_with_mode)
         df = remove_duplicates_with_min_price(df)
 
-        # Validation des données
+        # Validation of data
         df = df[(df['Price'] > 0) & (df['Memory Size'] > 0.1)]
 
-        # Sauvegarder le DataFrame nettoyé dans un nouveau fichier CSV
+        # Drop the original 'Title' column
+        if 'Title' in df.columns:
+            df.drop(columns=['Title'], inplace=True)
+
+        # Rename 'Cleaned Title' to 'title'
+        df = rename_cleaned_title_column(df)
+
+        # Drop unnecessary columns
+        df = drop_unnecessary_columns(df)
+
+        # Save the cleaned DataFrame to a new CSV file
         output_filename = CLEANED_DATA_DIR / f"{file.stem}_cleaned.csv"
         df.to_csv(output_filename, index=False)
         print(f"Cleaned data saved to {output_filename}")
