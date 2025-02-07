@@ -167,14 +167,7 @@ def get_next_scrape_number(output_dir, category_name):
     return scrape_number
 
 def scrape_flipkart(category_url, num_pages, category_name, output_dir="data/raw/flipkart"):
-    """
-    Scrapes Flipkart products for a given category and saves the output with a dynamic filename.
-    Args:
-        category_url (str): URL of the category to scrape.
-        num_pages (int): Number of pages to scrape.
-        category_name (str): Name of the category being scraped.
-        output_dir (str): Directory to save the scraped data.
-    """
+
     aggregated_results = []
     for page in range(1, num_pages + 1):
         print(f"Scraping page {page}...")
