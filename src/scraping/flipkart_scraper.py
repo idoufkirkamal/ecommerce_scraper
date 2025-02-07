@@ -208,19 +208,19 @@ if __name__ == "__main__":
     categories = {
         "graphics_cards": {
             "url": "https://www.flipkart.com/gaming-components/graphic-cards/pr?sid=4rr,tin,6zn&q=graphics+card&otracker=categorytree",
-            "num_pages": 0
+            "num_pages": 18
         },
         "laptops": {
             "url": "https://www.flipkart.com/laptops/pr?sid=6bo,b5g&q=laptop&otracker=categorytree",
-            "num_pages": 0
+            "num_pages": 18
         },
         "monitors": {
             "url": "https://www.flipkart.com/search?q=monitor&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off",
-            "num_pages": 13
+            "num_pages": 18
         },
         "smart_watches": {
             "url": "https://www.flipkart.com/wearable-smart-devices/smart-watches/pr?sid=ajy,buh&q=smart+watches&otracker=categorytree",
-            "num_pages": 13
+            "num_pages": 18
         }
     }
 

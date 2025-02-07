@@ -43,7 +43,7 @@ EVGA evga nvidia gtx 670 pci untested,7.99,EVGA,4,GDDR5,NVIDIA GeForce GTX 670,"
 EVGA evga geforce rtx 3060 ti ftw3 ultra gaming 08gp53667kl,200,EVGA,8,GDDR6,NVIDIA GeForce RTX 3060 Ti,"DisplayPort, HDCP, HDMI",1/29/2025 22:26
 EVGA evga geforce rtx 3070 xc3 black,192.5,EVGA,8,GDDR6,NVIDIA GeForce RTX 3070,"DisplayPort, HDMI",1/29/2025 22:26
 EVGA evga geforce rtx 3080 xc3 black gaming 10gb,409.99,EVGA,10,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
-GIGABYTE AMD Radeon HD 6770,19.44,GIGABYTE,1,GDDR5,AMD Radeon HD 6770,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+SAPPHIRE Radeon RX 7800 XT,509.99,SAPPHIRE,16,GDDR6,Radeon RX 7800 XT,"HDMI, DisplayPort",1/29/2025 22:26
 GIGABYTE gigabyte geforce gt 1030 low profile gvn1030d52gl,99.99,GIGABYTE,2,GDDR5,NVIDIA GeForce GT 1030,"DVI, DVI-D, HDMI, Component",1/29/2025 22:26
 GIGABYTE gigabyte geforce gtx 750 ti edition gvn75toc2gl,49.95,GIGABYTE,2,GDDR5,NVIDIA GeForce GTX 750 Ti,"DVI-I, DisplayPort, HDMI",1/29/2025 22:26
 GIGABYTE GeForce GTX 1650,169.99,GIGABYTE,4,GDDR5,GeForce GTX 1650,"DisplayPort, DVI, HDMI",1/29/2025 22:26
@@ -120,4 +120,3 @@ ZOTAC NVIDIA GeForce GT430,119.99,Zotac,0.5,DDR3,NVIDIA GeForce GT430,"DVI, HDMI
 ZOTAC zotac geforce gt 710,50,Zotac,2,DDR3,NVIDIA GeForce GT 710,"DVI, HDCP, HDMI, VGA",1/29/2025 22:26
 Zotac zotac geforce gtx 1070 mini,119.95,Zotac,8,GDDR5,Nvidia GeForce GTX 1070,"DisplayPort, HDMI",1/29/2025 22:26
 ZOTAC zotac gaming geforce rtx 3060 ti amp white edition lhr,312,Zotac,8,GDDR6,NVIDIA GeForce RTX 3060 Ti,HDMI,1/29/2025 22:27
-ZEBRONICS NVIDIA ZEB-GT610 2 GB DDR3 Graphics Card,160.2,ZEBRONICS,2,DDR3,ZEB-GT610,HDMI,1/29/2025 2:36

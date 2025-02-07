@@ -52,8 +52,30 @@ def get_random_user_agent():
 def handle_captcha(driver):
     """Pause execution and allow the user to solve CAPTCHA manually."""
     logging.info("CAPTCHA detected. Please solve it manually.")
-    input("Press Enter to continue after solving the CAPTCHA...")
-    logging.info("Resuming script execution...")
+    start_time = time.time()
+    timeout = 120  # 2 minutes timeout for solving CAPTCHA
+
+    while True:
+        input("Press Enter to continue after solving the CAPTCHA...")
+        time.sleep(5)  # Wait for a few seconds to allow the page to update
+
+        # Check if CAPTCHA is still present
+        try:
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "iframe[src*='captcha']"))
+            )
+            logging.info("CAPTCHA still present. Please solve it again.")
+        except:
+            logging.info("CAPTCHA resolved. Resuming script execution...")
+            driver.refresh()  # Refresh the page to ensure CAPTCHA is fully resolved
+            time.sleep(5)  # Wait for the page to load after refresh
+            break
+
+        # Check if the timeout has been reached
+        if time.time() - start_time > timeout:
+            logging.error("Timeout reached while solving CAPTCHA. Exiting...")
+            driver.quit()
+            exit(1)
 
 def scrape_product_details(driver, product_url):
     """Scrapes detailed product specifications from a product page."""
