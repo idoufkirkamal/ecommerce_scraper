@@ -1,122 +1,122 @@
 title,Price,Brand,Memory Size,Memory Type,Chipset/GPU Model,Connectors,Collection Date
-AMD AMD FirePro W2100,8.0,AMD,2.0,DDR3,AMD FirePro W2100,DisplayPort,1/29/2025 22:26
-AMD AMD Radeon R5 340X,23.0,AMD,2.0,GDDR3,AMD Radeon R5 340X,DisplayPort,1/29/2025 22:26
-AMD AMD Radeon E9173,21.98,AMD,2.0,GDDR5,AMD Radeon E9173,,1/29/2025 22:27
-AMD W4100,26.26,AMD,2.0,GDDR5,W4100,Mini DisplayPort,1/29/2025 22:26
-AMD AMD Radeon RX 5700,120.0,AMD,8.0,GDDR6,AMD Radeon RX 5700,"DVI, HDMI",1/29/2025 22:26
-AMD AMD Radeon Instinct MI50,165.0,AMD,16.0,HBM2,AMD Radeon Instinct MI50,,1/29/2025 22:26
-ASRock asrock md radeon rx 5700 xt rx5700xt fan broken,120.0,ASRock,8.0,GDDR6,AMD Radeon RX 5700 XT,DisplayPort,1/29/2025 22:26
-ASRock asrock radeon rx 6600 pci 40 cld 8g,198.99,ASRock,8.0,GDDR6,AMD Radeon RX 6600,"DisplayPort, HDMI",1/29/2025 22:26
-ASRock Radeon RX 6600,209.49,ASRock,8.0,GDDR6,Radeon RX 6600,"HDMI, DisplayPort",1/29/2025 22:26
-ASUS asus geforce gtx 650 grp240504,39.0,ASUS,1.0,GDDR5,NVIDIA GeForce GTX 650,,1/29/2025 22:26
-ASUS NVIDIA GeForce GT 710,69.99,ASUS,2.0,GDDR5,NVIDIA GeForce GT 710,HDMI,1/29/2025 22:26
-ASUS Asus Radeon R9 290X,29.0,ASUS,4.0,DDR5,Asus Radeon R9 290X,,1/29/2025 22:26
-NVIDIA GeForce GTX 1050 Ti,75.0,ASUS,4.0,GDDR5,NVIDIA GeForce GTX 1050 Ti,"1 x HDMI 2.0b, 1 x DisplayPort 1.4, 1 x Dual-Link DVI-D",1/29/2025 22:26
-ASUS ASUS GeForce GTX 1660 SUPER GUNDAM,219.99,ASUS,6.0,GDDR6,ASUS GeForce GTX 1660 SUPER GUNDAM,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-ASUS GTX 1660 SUPER ZAKU II,199.99,ASUS,6.0,GDDR6,GTX 1660 SUPER ZAKU II,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-ASUS asus turbo gtx1070,80.0,ASUS,8.0,GDDR5,NVIDIA GeForce GTX 1070,"DisplayPort, DVI, HDCP, HDMI",1/29/2025 22:26
-ASUS asus tuf geforce rtx 3070 v1,600.0,ASUS,8.0,GDDR6,NVIDIA GeForce RTX 3070,"DisplayPort, HDMI",1/29/2025 22:26
-ASUS asus rtx4060ti8g nvidia geforce rtx 4060ti,349.0,ASUS,8.0,GDDR6,NVIDIA GeForce RTX 4060 Ti,"DisplayPort, HDMI",1/29/2025 22:26
-Apple AMD Radeon HD 6970,33.24,Apple,1.0,DDR3,AMD Radeon HD 6970,,1/29/2025 22:26
-Apple apple imac 27 mid 2011 a1312 hd 6970m 109c2965710,54.99,Apple,2.0,GDDR3,AMD Radeon HD 6970,,1/29/2025 22:26
+AMD AMD FirePro W2100,8,AMD,2,DDR3,AMD FirePro W2100,DisplayPort,1/29/2025 22:26
+AMD AMD Radeon R5 340X,23,AMD,2,GDDR3,AMD Radeon R5 340X,DisplayPort,1/29/2025 22:26
+AMD AMD Radeon E9173,21.98,AMD,2,GDDR5,AMD Radeon E9173,,1/29/2025 22:27
+AMD W4100,26.26,AMD,2,GDDR5,W4100,Mini DisplayPort,1/29/2025 22:26
+AMD AMD Radeon RX 5700,120,AMD,8,GDDR6,AMD Radeon RX 5700,"DVI, HDMI",1/29/2025 22:26
+AMD AMD Radeon Instinct MI50,165,AMD,16,HBM2,AMD Radeon Instinct MI50,,1/29/2025 22:26
+ASRock asrock md radeon rx 5700 xt rx5700xt fan broken,120,ASRock,8,GDDR6,AMD Radeon RX 5700 XT,DisplayPort,1/29/2025 22:26
+ASRock asrock radeon rx 6600 pci 40 cld 8g,198.99,ASRock,8,GDDR6,AMD Radeon RX 6600,"DisplayPort, HDMI",1/29/2025 22:26
+ASRock Radeon RX 6600,209.49,ASRock,8,GDDR6,Radeon RX 6600,"HDMI, DisplayPort",1/29/2025 22:26
+ASUS asus geforce gtx 650 grp240504,39,ASUS,1,GDDR5,NVIDIA GeForce GTX 650,,1/29/2025 22:26
+ASUS NVIDIA GeForce GT 710,69.99,ASUS,2,GDDR5,NVIDIA GeForce GT 710,HDMI,1/29/2025 22:26
+ASUS Asus Radeon R9 290X,29,ASUS,4,DDR5,Asus Radeon R9 290X,,1/29/2025 22:26
+NVIDIA GeForce GTX 1050 Ti,75,ASUS,4,GDDR5,NVIDIA GeForce GTX 1050 Ti,"1 x HDMI 2.0b, 1 x DisplayPort 1.4, 1 x Dual-Link DVI-D",1/29/2025 22:26
+ASUS ASUS GeForce GTX 1660 SUPER GUNDAM,219.99,ASUS,6,GDDR6,ASUS GeForce GTX 1660 SUPER GUNDAM,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+ASUS GTX 1660 SUPER ZAKU II,199.99,ASUS,6,GDDR6,GTX 1660 SUPER ZAKU II,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+ASUS asus turbo gtx1070,80,ASUS,8,GDDR5,NVIDIA GeForce GTX 1070,"DisplayPort, DVI, HDCP, HDMI",1/29/2025 22:26
+ASUS asus tuf geforce rtx 3070 v1,600,ASUS,8,GDDR6,NVIDIA GeForce RTX 3070,"DisplayPort, HDMI",1/29/2025 22:26
+ASUS asus rtx4060ti8g nvidia geforce rtx 4060ti,349,ASUS,8,GDDR6,NVIDIA GeForce RTX 4060 Ti,"DisplayPort, HDMI",1/29/2025 22:26
+Apple AMD Radeon HD 6970,33.24,Apple,1,DDR3,AMD Radeon HD 6970,,1/29/2025 22:26
+Apple apple imac 27 mid 2011 a1312 hd 6970m 109c2965710,54.99,Apple,2,GDDR3,AMD Radeon HD 6970,,1/29/2025 22:26
 Barco Barco,135.59,Barco,0.5,DDR3,Barco,"DisplayPort, DVI",1/29/2025 22:26
-Dell dell amd radeon hd8490 ddr3,9.0,Dell,1.0,DDR3,AMD Radeon HD 8490,"DisplayPort, DVI, DVI-I",1/29/2025 22:26
-Dell AMD Radeon HD 7470,7.79,Dell,1.0,GDDR3,AMD Radeon HD 7470,"DisplayPort, DVI, DVI-D, DVI-I",1/29/2025 22:27
-Dell NVIDIA GeForce GT 705,18.13,Dell,2.0,DDR3,NVIDIA GeForce GT 705,"DVI, HDMI, VGA",1/29/2025 22:26
-Dell dell optiplex 7010 7020 7040 7050 7060 7070 tower slim,26.99,Dell,2.0,GDDR3,Radeon R5,HDMI,1/29/2025 22:26
-Dell NVIDIA Quadro 4000,89.99,Dell,2.0,GDDR5,NVIDIA Quadro 4000,DisplayPort,1/29/2025 22:26
-Dell NVIDIA Quadro K2000,22.99,Dell,2.0,GDDR5,NVIDIA Quadro K2000,"DVI-I, DisplayPort",1/29/2025 22:26
-Dell Radeon R5 430,12.99,Dell,2.0,GDDR5,Radeon R5 430,"DisplayPort, DVI",1/29/2025 22:26
-Dell Radeon RX 640,79.9,Dell,4.0,DDR5,Radeon RX 640,,1/29/2025 22:26
-Dell AMD Radeon RX 550,42.95,Dell,4.0,GDDR5,AMD Radeon RX 550,"DisplayPort, Mini DisplayPort",1/29/2025 22:26
-Dell dell precision 156 7560 nvidia t1200 476gf qn20p1a1,322.55,Dell,4.0,GDDR6,Quadro T1200,,1/29/2025 22:27
-Dell dell precision 7530 6gb quadro p3200 lsf594p n18eq1kaa1,155.0,Dell,6.0,GDDR5,NVIDIA Quadro P3200,,1/29/2025 22:26
-Dell NVIDIA GeForce GTX 1660 Ti,129.99,Dell,6.0,GDDR6,NVIDIA GeForce GTX 1660 Ti,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-DELL Tesla P4,114.95,Dell,8.0,GDDR5,Tesla P4,,1/29/2025 22:26
-AMD Radeon Pro W6600,169.0,Dell,8.0,GDDR6,AMD Radeon Pro W6600,DisplayPort,1/29/2025 22:26
-Dell dell nvidia geforce rtx 3060ti 1x 3x,265.0,Dell,8.0,GDDR6,NVIDIA GeForce RTX 3060 Ti,"DisplayPort, HDMI",1/29/2025 22:26
-Dell NVIDIA GeForce RTX 3080,375.0,Dell,10.0,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
-Dell AMD FIREPRO S9150,99.99,Dell,16.0,VRAM,AMD FIREPRO S9150,,1/29/2025 22:26
-EVGA evga geforce gtx 1050 02gp46150kr,40.99,EVGA,2.0,GDDR5,NVIDIA GeForce GTX 1050,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-EVGA evga geforce gtx 780 3gb dp,49.99,EVGA,3.0,GDDR5,NVIDIA GeForce GTX 780,HDMI,1/29/2025 22:26
-EVGA evga nvidia gtx 670 pci untested,7.99,EVGA,4.0,GDDR5,NVIDIA GeForce GTX 670,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-EVGA evga geforce rtx 3060 ti ftw3 ultra gaming 08gp53667kl,200.0,EVGA,8.0,GDDR6,NVIDIA GeForce RTX 3060 Ti,"DisplayPort, HDCP, HDMI",1/29/2025 22:26
-EVGA evga geforce rtx 3070 xc3 black,192.5,EVGA,8.0,GDDR6,NVIDIA GeForce RTX 3070,"DisplayPort, HDMI",1/29/2025 22:26
-EVGA evga geforce rtx 3080 xc3 black gaming 10gb,409.99,EVGA,10.0,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
-GIGABYTE AMD Radeon HD 6770,19.44,GIGABYTE,1.0,GDDR5,AMD Radeon HD 6770,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-GIGABYTE gigabyte geforce gt 1030 low profile gvn1030d52gl,99.99,GIGABYTE,2.0,GDDR5,NVIDIA GeForce GT 1030,"DVI, DVI-D, HDMI, Component",1/29/2025 22:26
-GIGABYTE gigabyte geforce gtx 750 ti edition gvn75toc2gl,49.95,GIGABYTE,2.0,GDDR5,NVIDIA GeForce GTX 750 Ti,"DVI-I, DisplayPort, HDMI",1/29/2025 22:26
-GIGABYTE GeForce GTX 1650,169.99,GIGABYTE,4.0,GDDR5,GeForce GTX 1650,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-GIGABYTE gigabyte gtx 1050 ti low profile gvn105toc4gl,149.99,GIGABYTE,4.0,GDDR5,NVIDIA GeForce GTX 1050 Ti,DisplayPort,1/29/2025 22:26
-GIGABYTE NVIDIA GeForce GTX 1060,59.99,GIGABYTE,6.0,GDDR5,NVIDIA GeForce GTX 1060,"DVI-I, DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:27
-GIGABYTE GeForce RTX 3050,188.49,GIGABYTE,6.0,GDDR6,GeForce RTX 3050,,1/29/2025 22:26
-GIGABYTE gigabyte geforce gtx 1660 super gaming 6gb pci 30 x16,109.99,GIGABYTE,6.0,GDDR6,NVIDIA GeForce GTX1660 SUPER,"DisplayPort, HDMI",1/29/2025 22:26
-GIGABYTE gigabyte radeon rx 570 gvrx570gaming8gd,12.79,GIGABYTE,8.0,GDDR5,AMD Radeon RX 570,"DisplayPort, HDMI",1/29/2025 22:26
-GIGABYTE AMD Radeon RX 580,99.94,GIGABYTE,8.0,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
-Gigabyte gigabyte nvidia p104100 mining gtx 1080 hashrate us s,44.97,GIGABYTE,8.0,GDDR5X,P104-100,,1/29/2025 22:27
-GIGABYTE gigabyte radeon rx 5700 xt gaming,155.0,GIGABYTE,8.0,GDDR6,GIGABYTE Radeon RX 5700 XT GAMING OC,"DisplayPort 1.4, HDMI",1/29/2025 22:26
-GIGABYTE gigabyte radeon rx 7700 xt gaming 12g 3x windforce fans 1,429.49,GIGABYTE,12.0,GDDR6,AMD Radeon RX 7700 XT,"DisplayPort, HDMI",1/29/2025 22:26
-GIGABYTE gigabyte geforce rtx 4090 aero 24g,1425.0,GIGABYTE,24.0,GDDR6X,NVIDIA GeForce RTX 4090,"DisplayPort, HDMI",1/29/2025 22:26
-Galax galax nvidia p104100 mining gtx 1080 hashrate us seller,39.94,Galax,8.0,GDDR5X,P104-100,,1/29/2025 22:26
-Geforce GeForce ® GTX 650,2.49,Geforce,1.0,GDDR5,GeForce ® GTX 650,,1/29/2025 22:27
-Geforce geforce gtx200 sonic,39.99,Geforce,896.0,GDDR3,NVIDIA GEFORCE GTX200,,1/29/2025 22:26
-Graphics NVIDIA GeForce GTX 1660 Super,118.06,Graphics,6.0,GDDR6,NVIDIA GeForce GTX 1660 Super,"DisplayPort, HDMI",1/29/2025 22:26
-AMD Radeon RX 580,105.77,Graphics,8.0,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
-Graphics NVIDIA Quadro 4000,199.0,Graphics,8.0,GDDR5,NVIDIA Quadro 4000,DisplayPort,1/29/2025 22:26
-Intel Arc B580,369.99,Graphics,12.0,GDDR6,Intel Arc B580,,1/29/2025 22:26
-HP hp quadro k420 ddr3 818244001 818870001 fh bracket,13.99,HP,2.0,DDR3,NVIDIA Quadro K420,DisplayPort / DVI-D,1/29/2025 22:26
-HP nvidia geforce gt630 hp pclex16 702084001 684455002,20.32,HP,2.0,GDDR3,NVIDIA GeForce GT 630,"DisplayPort, DVI",1/29/2025 22:26
-HP hp radeon r5 520 109d0345700a l09404001,25.0,HP,2.0,GDDR5,AMD Radeon R5 520,,1/29/2025 22:26
-Radeon Pro WX 3100,20.0,HP,4.0,GDDR5,Radeon Pro WX 3100,"DisplayPort, Mini DisplayPort",1/29/2025 22:26
-HP hp z2 mini g5 quadro t2000 n19pq3a1 l62510001,169.15,HP,4.0,GDDR6,Nvidia Quadro T2000,,1/29/2025 22:26
-HP hp envy 32a1 nvidia rtx 2080 super n18eg3ra1 danzfth7ca0,299.0,HP,8.0,GDDR6,NVIDIA GeForce RTX 2080 Super,,1/29/2025 22:26
-HP nvidia hp geforce rtx 3060 ti nonlhr gddr 6 works great,270.0,HP,8.0,GDDR6,NVIDIA GeForce RTX 3060 Ti,DisplayPort,1/29/2025 22:26
-Lenovo lenovo radeon hd 7450 1 gb ddr3 pci x16,13.13,Lenovo,1.0,DDR3,AMD Radeon HD 7450,"DisplayPort, DVI",1/29/2025 22:26
-MSI AMD Radeon RX 460,35.0,MSI,2.0,GDDR5,AMD Radeon RX 460,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
-MSI NVIDIA GeForce GTX 1050 Ti,73.0,MSI,4.0,GDDR5,NVIDIA GeForce GTX 1050 Ti,DisplayPort,1/29/2025 22:26
-MSI Radeon RX 6500 XT,99.99,MSI,4.0,GDDR6,Radeon RX 6500 XT,,1/29/2025 22:26
-MSI GeForce GTX 1060 Gaming X 6G,89.0,MSI,6.0,GDDR5,GeForce GTX 1060 Gaming X 6G,,1/29/2025 22:26
-MSI msi geforce gtx 1660 ventus xs 6g 6gb,99.0,MSI,6.0,GDDR6,NVIDIA GeForce GTX 1660,,1/29/2025 22:27
-MSI msi geforce gtx 1660 ti ventus xs g1660tvxs6c,71.0,MSI,6.0,GDDR6,NVIDIA GeForce GTX 1660 Ti,HDMI,1/29/2025 22:26
-MSI msi radeon rx 580 rx580armor8goc,50.0,MSI,8.0,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:27
-MSI msi geforce rtx 3070 ti ventus 3x 8g original,329.0,MSI,8.0,GDDR6X,NVIDIA GeForce RTX 3070Ti,"DisplayPort, HDMI",1/29/2025 22:26
-MSI msi geforce gtx 1080 ti gaming 11gb gddr5x gtx1080tigaming11g,239.75,MSI,11.0,GDDR5X,NVIDIA GeForce GTX 1080 Ti,"DisplayPort, DVI-D, HDMI",1/29/2025 22:26
-MSI msi geforce rtx 2060 ventus gp,130.0,MSI,12.0,GDDR6,NVIDIA GeForce RTX 2060,,1/29/2025 22:26
-MSI msi geforce rtx 3060 ventus 3x 12,200.0,MSI,12.0,GDDR6,NVIDIA GeForce RTX 3060,"DisplayPort, HDMI",1/29/2025 22:26
-MSI RTX 4070 SUPER,1000.0,MSI,12.0,GDDR6X,RTX 4070 SUPER,"DisplayPort, HDMI",1/29/2025 22:27
-MSI NVIDIA GeForce RTX 3090,950.0,MSI,24.0,GDDR6X,NVIDIA GeForce RTX 3090,"DisplayPort, HDMI",1/29/2025 22:26
+Dell dell amd radeon hd8490 ddr3,9,Dell,1,DDR3,AMD Radeon HD 8490,"DisplayPort, DVI, DVI-I",1/29/2025 22:26
+Dell AMD Radeon HD 7470,7.79,Dell,1,GDDR3,AMD Radeon HD 7470,"DisplayPort, DVI, DVI-D, DVI-I",1/29/2025 22:27
+Dell NVIDIA GeForce GT 705,18.13,Dell,2,DDR3,NVIDIA GeForce GT 705,"DVI, HDMI, VGA",1/29/2025 22:26
+Dell dell optiplex 7010 7020 7040 7050 7060 7070 tower slim,26.99,Dell,2,GDDR3,Radeon R5,HDMI,1/29/2025 22:26
+Dell NVIDIA Quadro 4000,89.99,Dell,2,GDDR5,NVIDIA Quadro 4000,DisplayPort,1/29/2025 22:26
+Dell NVIDIA Quadro K2000,22.99,Dell,2,GDDR5,NVIDIA Quadro K2000,"DVI-I, DisplayPort",1/29/2025 22:26
+Dell Radeon R5 430,12.99,Dell,2,GDDR5,Radeon R5 430,"DisplayPort, DVI",1/29/2025 22:26
+Dell Radeon RX 640,79.9,Dell,4,DDR5,Radeon RX 640,,1/29/2025 22:26
+Dell AMD Radeon RX 550,42.95,Dell,4,GDDR5,AMD Radeon RX 550,"DisplayPort, Mini DisplayPort",1/29/2025 22:26
+Dell dell precision 156 7560 nvidia t1200 476gf qn20p1a1,322.55,Dell,4,GDDR6,Quadro T1200,,1/29/2025 22:27
+Dell dell precision 7530 6gb quadro p3200 lsf594p n18eq1kaa1,155,Dell,6,GDDR5,NVIDIA Quadro P3200,,1/29/2025 22:26
+Dell NVIDIA GeForce GTX 1660 Ti,129.99,Dell,6,GDDR6,NVIDIA GeForce GTX 1660 Ti,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+DELL Tesla P4,114.95,Dell,8,GDDR5,Tesla P4,,1/29/2025 22:26
+AMD Radeon Pro W6600,169,Dell,8,GDDR6,AMD Radeon Pro W6600,DisplayPort,1/29/2025 22:26
+Dell dell nvidia geforce rtx 3060ti 1x 3x,265,Dell,8,GDDR6,NVIDIA GeForce RTX 3060 Ti,"DisplayPort, HDMI",1/29/2025 22:26
+Dell NVIDIA GeForce RTX 3080,375,Dell,10,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
+Dell AMD FIREPRO S9150,99.99,Dell,16,VRAM,AMD FIREPRO S9150,,1/29/2025 22:26
+EVGA evga geforce gtx 1050 02gp46150kr,40.99,EVGA,2,GDDR5,NVIDIA GeForce GTX 1050,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+EVGA evga geforce gtx 780 3gb dp,49.99,EVGA,3,GDDR5,NVIDIA GeForce GTX 780,HDMI,1/29/2025 22:26
+EVGA evga nvidia gtx 670 pci untested,7.99,EVGA,4,GDDR5,NVIDIA GeForce GTX 670,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+EVGA evga geforce rtx 3060 ti ftw3 ultra gaming 08gp53667kl,200,EVGA,8,GDDR6,NVIDIA GeForce RTX 3060 Ti,"DisplayPort, HDCP, HDMI",1/29/2025 22:26
+EVGA evga geforce rtx 3070 xc3 black,192.5,EVGA,8,GDDR6,NVIDIA GeForce RTX 3070,"DisplayPort, HDMI",1/29/2025 22:26
+EVGA evga geforce rtx 3080 xc3 black gaming 10gb,409.99,EVGA,10,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
+SAPPHIRE Radeon RX 7800 XT,509.99,SAPPHIRE,16,GDDR6,Radeon RX 7800 XT,"HDMI, DisplayPort",1/29/2025 22:26
+GIGABYTE gigabyte geforce gt 1030 low profile gvn1030d52gl,99.99,GIGABYTE,2,GDDR5,NVIDIA GeForce GT 1030,"DVI, DVI-D, HDMI, Component",1/29/2025 22:26
+GIGABYTE gigabyte geforce gtx 750 ti edition gvn75toc2gl,49.95,GIGABYTE,2,GDDR5,NVIDIA GeForce GTX 750 Ti,"DVI-I, DisplayPort, HDMI",1/29/2025 22:26
+GIGABYTE GeForce GTX 1650,169.99,GIGABYTE,4,GDDR5,GeForce GTX 1650,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+GIGABYTE gigabyte gtx 1050 ti low profile gvn105toc4gl,149.99,GIGABYTE,4,GDDR5,NVIDIA GeForce GTX 1050 Ti,DisplayPort,1/29/2025 22:26
+GIGABYTE NVIDIA GeForce GTX 1060,59.99,GIGABYTE,6,GDDR5,NVIDIA GeForce GTX 1060,"DVI-I, DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:27
+GIGABYTE GeForce RTX 3050,188.49,GIGABYTE,6,GDDR6,GeForce RTX 3050,,1/29/2025 22:26
+GIGABYTE gigabyte geforce gtx 1660 super gaming 6gb pci 30 x16,109.99,GIGABYTE,6,GDDR6,NVIDIA GeForce GTX1660 SUPER,"DisplayPort, HDMI",1/29/2025 22:26
+GIGABYTE gigabyte radeon rx 570 gvrx570gaming8gd,12.79,GIGABYTE,8,GDDR5,AMD Radeon RX 570,"DisplayPort, HDMI",1/29/2025 22:26
+GIGABYTE AMD Radeon RX 580,99.94,GIGABYTE,8,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
+Gigabyte gigabyte nvidia p104100 mining gtx 1080 hashrate us s,44.97,GIGABYTE,8,GDDR5X,P104-100,,1/29/2025 22:27
+GIGABYTE gigabyte radeon rx 5700 xt gaming,155,GIGABYTE,8,GDDR6,GIGABYTE Radeon RX 5700 XT GAMING OC,"DisplayPort 1.4, HDMI",1/29/2025 22:26
+GIGABYTE gigabyte radeon rx 7700 xt gaming 12g 3x windforce fans 1,429.49,GIGABYTE,12,GDDR6,AMD Radeon RX 7700 XT,"DisplayPort, HDMI",1/29/2025 22:26
+GIGABYTE gigabyte geforce rtx 4090 aero 24g,1425,GIGABYTE,24,GDDR6X,NVIDIA GeForce RTX 4090,"DisplayPort, HDMI",1/29/2025 22:26
+Galax galax nvidia p104100 mining gtx 1080 hashrate us seller,39.94,Galax,8,GDDR5X,P104-100,,1/29/2025 22:26
+Geforce GeForce ® GTX 650,2.49,Geforce,1,GDDR5,GeForce ® GTX 650,,1/29/2025 22:27
+Geforce geforce gtx200 sonic,39.99,Geforce,896,GDDR3,NVIDIA GEFORCE GTX200,,1/29/2025 22:26
+Graphics NVIDIA GeForce GTX 1660 Super,118.06,Graphics,6,GDDR6,NVIDIA GeForce GTX 1660 Super,"DisplayPort, HDMI",1/29/2025 22:26
+AMD Radeon RX 580,105.77,Graphics,8,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
+Graphics NVIDIA Quadro 4000,199,Graphics,8,GDDR5,NVIDIA Quadro 4000,DisplayPort,1/29/2025 22:26
+Intel Arc B580,369.99,Graphics,12,GDDR6,Intel Arc B580,,1/29/2025 22:26
+HP hp quadro k420 ddr3 818244001 818870001 fh bracket,13.99,HP,2,DDR3,NVIDIA Quadro K420,DisplayPort / DVI-D,1/29/2025 22:26
+HP nvidia geforce gt630 hp pclex16 702084001 684455002,20.32,HP,2,GDDR3,NVIDIA GeForce GT 630,"DisplayPort, DVI",1/29/2025 22:26
+HP hp radeon r5 520 109d0345700a l09404001,25,HP,2,GDDR5,AMD Radeon R5 520,,1/29/2025 22:26
+Radeon Pro WX 3100,20,HP,4,GDDR5,Radeon Pro WX 3100,"DisplayPort, Mini DisplayPort",1/29/2025 22:26
+HP hp z2 mini g5 quadro t2000 n19pq3a1 l62510001,169.15,HP,4,GDDR6,Nvidia Quadro T2000,,1/29/2025 22:26
+HP hp envy 32a1 nvidia rtx 2080 super n18eg3ra1 danzfth7ca0,299,HP,8,GDDR6,NVIDIA GeForce RTX 2080 Super,,1/29/2025 22:26
+HP nvidia hp geforce rtx 3060 ti nonlhr gddr 6 works great,270,HP,8,GDDR6,NVIDIA GeForce RTX 3060 Ti,DisplayPort,1/29/2025 22:26
+Lenovo lenovo radeon hd 7450 1 gb ddr3 pci x16,13.13,Lenovo,1,DDR3,AMD Radeon HD 7450,"DisplayPort, DVI",1/29/2025 22:26
+MSI AMD Radeon RX 460,35,MSI,2,GDDR5,AMD Radeon RX 460,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
+MSI NVIDIA GeForce GTX 1050 Ti,73,MSI,4,GDDR5,NVIDIA GeForce GTX 1050 Ti,DisplayPort,1/29/2025 22:26
+MSI Radeon RX 6500 XT,99.99,MSI,4,GDDR6,Radeon RX 6500 XT,,1/29/2025 22:26
+MSI GeForce GTX 1060 Gaming X 6G,89,MSI,6,GDDR5,GeForce GTX 1060 Gaming X 6G,,1/29/2025 22:26
+MSI msi geforce gtx 1660 ventus xs 6g 6gb,99,MSI,6,GDDR6,NVIDIA GeForce GTX 1660,,1/29/2025 22:27
+MSI msi geforce gtx 1660 ti ventus xs g1660tvxs6c,71,MSI,6,GDDR6,NVIDIA GeForce GTX 1660 Ti,HDMI,1/29/2025 22:26
+MSI msi radeon rx 580 rx580armor8goc,50,MSI,8,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:27
+MSI msi geforce rtx 3070 ti ventus 3x 8g original,329,MSI,8,GDDR6X,NVIDIA GeForce RTX 3070Ti,"DisplayPort, HDMI",1/29/2025 22:26
+MSI msi geforce gtx 1080 ti gaming 11gb gddr5x gtx1080tigaming11g,239.75,MSI,11,GDDR5X,NVIDIA GeForce GTX 1080 Ti,"DisplayPort, DVI-D, HDMI",1/29/2025 22:26
+MSI msi geforce rtx 2060 ventus gp,130,MSI,12,GDDR6,NVIDIA GeForce RTX 2060,,1/29/2025 22:26
+MSI msi geforce rtx 3060 ventus 3x 12,200,MSI,12,GDDR6,NVIDIA GeForce RTX 3060,"DisplayPort, HDMI",1/29/2025 22:26
+MSI RTX 4070 SUPER,1000,MSI,12,GDDR6X,RTX 4070 SUPER,"DisplayPort, HDMI",1/29/2025 22:27
+MSI NVIDIA GeForce RTX 3090,950,MSI,24,GDDR6X,NVIDIA GeForce RTX 3090,"DisplayPort, HDMI",1/29/2025 22:26
 NVIDIA NVIDIA Quadro 410,19.9,NVIDIA,0.5,GDDR3,NVIDIA Quadro 410,DisplayPort,1/29/2025 22:26
 NVIDIA NVIDIA Quadro NVS 450,13.54,NVIDIA,0.5,GDDR3,NVIDIA Quadro NVS 450,,1/29/2025 22:26
-NVIDIA NVIDIA GeForce GT 1030,29.99,NVIDIA,2.0,GDDR5,NVIDIA GeForce GT 1030,"DVI, HDMI, VGA",1/29/2025 22:27
-NVIDIA NVIDIA GeForce GTX 1650,179.55,NVIDIA,4.0,GDDR5,NVIDIA GeForce GTX 1650,,1/29/2025 22:26
-NVIDIA nvidia quadro p4000 cuda pascal 4k encode decode,169.99,NVIDIA,8.0,GDDR5,NVIDIA Quadro 4000,DisplayPort,1/29/2025 22:26
-NVIDIA NVIDIA Quadro RTX 4000,234.99,NVIDIA,8.0,GDDR6,NVIDIA Quadro RTX 4000,3x Display Port 1x USB Type C,1/29/2025 22:26
-NVIDIA NVIDIA GeForce RTX 3080,499.0,NVIDIA,10.0,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
-NVIDIA NVIDIA TESLA M40,39.99,NVIDIA,12.0,DDR5,NVIDIA TESLA M40,,1/29/2025 22:26
-NVIDIA Tesla M40,38.79,NVIDIA,12.0,GDDR5,Tesla M40,,1/29/2025 22:26
-NVIDIA nvidia geforce gtx titan x 6991g6000000520 gaming,179.99,NVIDIA,12.0,GDDR5X,NVIDIA GeForce GTX TITAN Xp,1x HDMi 3x Display Port,1/29/2025 22:26
-NVIDIA nvidia founders edition geforce rtx 3080 ti very good box,576.99,NVIDIA,12.0,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
-NVIDIA nvidia titan v volta hbm2 9001g5002500000,354.99,NVIDIA,12.0,HBM2,NVIDIA GeForce GTX Titan V,3x Display Port 1x HDMI,1/29/2025 22:26
-NVIDIA NVIDIA Tesla K80,47.39,NVIDIA,24.0,GDDR5,NVIDIA Tesla K80,,1/29/2025 22:26
-NVIDIA nvidia geforce rtx nvlink hb bridge 4 for 303000 3090 sli hb,178.0,NVIDIA,24.0,GDDR6X,NVIDIA GeForce RTX 3090,Nvlink,1/29/2025 22:27
+NVIDIA NVIDIA GeForce GT 1030,29.99,NVIDIA,2,GDDR5,NVIDIA GeForce GT 1030,"DVI, HDMI, VGA",1/29/2025 22:27
+NVIDIA NVIDIA GeForce GTX 1650,179.55,NVIDIA,4,GDDR5,NVIDIA GeForce GTX 1650,,1/29/2025 22:26
+NVIDIA nvidia quadro p4000 cuda pascal 4k encode decode,169.99,NVIDIA,8,GDDR5,NVIDIA Quadro 4000,DisplayPort,1/29/2025 22:26
+NVIDIA NVIDIA Quadro RTX 4000,234.99,NVIDIA,8,GDDR6,NVIDIA Quadro RTX 4000,3x Display Port 1x USB Type C,1/29/2025 22:26
+NVIDIA NVIDIA GeForce RTX 3080,499,NVIDIA,10,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
+NVIDIA NVIDIA TESLA M40,39.99,NVIDIA,12,DDR5,NVIDIA TESLA M40,,1/29/2025 22:26
+NVIDIA Tesla M40,38.79,NVIDIA,12,GDDR5,Tesla M40,,1/29/2025 22:26
+NVIDIA nvidia geforce gtx titan x 6991g6000000520 gaming,179.99,NVIDIA,12,GDDR5X,NVIDIA GeForce GTX TITAN Xp,1x HDMi 3x Display Port,1/29/2025 22:26
+NVIDIA nvidia founders edition geforce rtx 3080 ti very good box,576.99,NVIDIA,12,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
+NVIDIA nvidia titan v volta hbm2 9001g5002500000,354.99,NVIDIA,12,HBM2,NVIDIA GeForce GTX Titan V,3x Display Port 1x HDMI,1/29/2025 22:26
+NVIDIA NVIDIA Tesla K80,47.39,NVIDIA,24,GDDR5,NVIDIA Tesla K80,,1/29/2025 22:26
+NVIDIA nvidia geforce rtx nvlink hb bridge 4 for 303000 3090 sli hb,178,NVIDIA,24,GDDR6X,NVIDIA GeForce RTX 3090,Nvlink,1/29/2025 22:27
 PNY NVIDIA GeForce 6800 GT,174.75,PNY,0.25,GDDR3,NVIDIA GeForce 6800 GT,"D-Sub, DVI, S-Video",1/29/2025 22:26
-PNY NVIDIA GeForce GTX 1050 Ti,60.0,PNY,4.0,GDDR5,NVIDIA GeForce GTX 1050 Ti,DisplayPort,1/29/2025 22:26
-PNY pny nvidia rtx 2070 super vcg20708sblmpb,199.98,PNY,8.0,GDDR6,NVIDIA GeForce RTX 2070 Super,"DisplayPort, HDMI",1/29/2025 22:26
-PNY NVIDIA GeForce RTX 4060 Ti,324.97,PNY,8.0,GDDR6,NVIDIA GeForce RTX 4060 Ti,"DisplayPort, HDMI",1/29/2025 22:26
-NVIDIA Quadro RTX 5000,499.0,PNY,16.0,GDDR6,NVIDIA Quadro RTX 5000,"DisplayPort, USB-C",1/29/2025 22:26
-PowerColor AMD Radeon RX 570,30.0,PowerColor,4.0,GDDR5,AMD Radeon RX 570,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
-PowerColor powercolor amd radeon rx vega 56 red devil hbm2 w box,100.0,PowerColor,8.0,HBM2,Devil RX Vega 64,,1/29/2025 22:26
-PowerColor AMD Radeon RX 6900 XT,460.0,PowerColor,16.0,GDDR6,AMD Radeon RX 6900 XT,"DisplayPort, HDMI, USB-C",1/29/2025 22:27
-SAPPHIRE sapphire geforce gt 705 ddr3 pcie,14.0,SAPPHIRE,1.0,DDR3,NVIDIA GeForce GT 705,"DVI, HDMI, VGA",1/29/2025 22:27
-SAPPHIRE sapphire nitro radeon r9 380 2992e308300sa,40.0,SAPPHIRE,4.0,GDDR5,AMD Radeon R9 380,"DisplayPort, DVI, HDMI",1/29/2025 22:26
-SAPPHIRE sapphire nitro radeon rx 580,109.43,SAPPHIRE,4.0,GDDR5,Radeon RX 470,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
-SAPPHIRE sapphire pulse radeon rx 580,70.0,SAPPHIRE,8.0,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI-D, HDMI",1/29/2025 22:26
-SAPPHIRE AMD Radeon RX 6700 XT,237.5,SAPPHIRE,12.0,GDDR6,AMD Radeon RX 6700 XT,"DisplayPort, HDMI",1/29/2025 22:26
-STG Aubron stg aubron radeon rx 580 not as is,20.0,STG Aubron,8.0,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
-Unbranded NVIDIA GeForce RTX 3080,389.0,Unbranded,10.0,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
-XFX xfx speedster swft 309 radeon rx 6700 xt,250.0,XFX,12.0,GDDR6,AMD Radeon RX 6700 XT,"DisplayPort, HDMI",1/29/2025 22:26
-XFX xfx speedster qick319 radeon rx 6750xt gaming with gd,320.0,XFX,12.0,GDDR6,Does not apply,"HDMI, DisplayPort",1/29/2025 22:26
+PNY NVIDIA GeForce GTX 1050 Ti,60,PNY,4,GDDR5,NVIDIA GeForce GTX 1050 Ti,DisplayPort,1/29/2025 22:26
+PNY pny nvidia rtx 2070 super vcg20708sblmpb,199.98,PNY,8,GDDR6,NVIDIA GeForce RTX 2070 Super,"DisplayPort, HDMI",1/29/2025 22:26
+PNY NVIDIA GeForce RTX 4060 Ti,324.97,PNY,8,GDDR6,NVIDIA GeForce RTX 4060 Ti,"DisplayPort, HDMI",1/29/2025 22:26
+NVIDIA Quadro RTX 5000,499,PNY,16,GDDR6,NVIDIA Quadro RTX 5000,"DisplayPort, USB-C",1/29/2025 22:26
+PowerColor AMD Radeon RX 570,30,PowerColor,4,GDDR5,AMD Radeon RX 570,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
+PowerColor powercolor amd radeon rx vega 56 red devil hbm2 w box,100,PowerColor,8,HBM2,Devil RX Vega 64,,1/29/2025 22:26
+PowerColor AMD Radeon RX 6900 XT,460,PowerColor,16,GDDR6,AMD Radeon RX 6900 XT,"DisplayPort, HDMI, USB-C",1/29/2025 22:27
+SAPPHIRE sapphire geforce gt 705 ddr3 pcie,14,SAPPHIRE,1,DDR3,NVIDIA GeForce GT 705,"DVI, HDMI, VGA",1/29/2025 22:27
+SAPPHIRE sapphire nitro radeon r9 380 2992e308300sa,40,SAPPHIRE,4,GDDR5,AMD Radeon R9 380,"DisplayPort, DVI, HDMI",1/29/2025 22:26
+SAPPHIRE sapphire nitro radeon rx 580,109.43,SAPPHIRE,4,GDDR5,Radeon RX 470,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
+SAPPHIRE sapphire pulse radeon rx 580,70,SAPPHIRE,8,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI-D, HDMI",1/29/2025 22:26
+SAPPHIRE AMD Radeon RX 6700 XT,237.5,SAPPHIRE,12,GDDR6,AMD Radeon RX 6700 XT,"DisplayPort, HDMI",1/29/2025 22:26
+STG Aubron stg aubron radeon rx 580 not as is,20,STG Aubron,8,GDDR5,AMD Radeon RX 580,"DisplayPort, DVI, DVI-D, HDMI",1/29/2025 22:26
+Unbranded NVIDIA GeForce RTX 3080,389,Unbranded,10,GDDR6X,NVIDIA GeForce RTX 3080,"DisplayPort, HDMI",1/29/2025 22:26
+XFX xfx speedster swft 309 radeon rx 6700 xt,250,XFX,12,GDDR6,AMD Radeon RX 6700 XT,"DisplayPort, HDMI",1/29/2025 22:26
+XFX xfx speedster qick319 radeon rx 6750xt gaming with gd,320,XFX,12,GDDR6,Does not apply,"HDMI, DisplayPort",1/29/2025 22:26
 ZOTAC NVIDIA GeForce GT430,119.99,Zotac,0.5,DDR3,NVIDIA GeForce GT430,"DVI, HDMI, VGA",1/29/2025 22:26
-ZOTAC zotac geforce gt 710,50.0,Zotac,2.0,DDR3,NVIDIA GeForce GT 710,"DVI, HDCP, HDMI, VGA",1/29/2025 22:26
-Zotac zotac geforce gtx 1070 mini,119.95,Zotac,8.0,GDDR5,Nvidia GeForce GTX 1070,"DisplayPort, HDMI",1/29/2025 22:26
-ZOTAC zotac gaming geforce rtx 3060 ti amp white edition lhr,312.0,Zotac,8.0,GDDR6,NVIDIA GeForce RTX 3060 Ti,HDMI,1/29/2025 22:27
+ZOTAC zotac geforce gt 710,50,Zotac,2,DDR3,NVIDIA GeForce GT 710,"DVI, HDCP, HDMI, VGA",1/29/2025 22:26
+Zotac zotac geforce gtx 1070 mini,119.95,Zotac,8,GDDR5,Nvidia GeForce GTX 1070,"DisplayPort, HDMI",1/29/2025 22:26
+ZOTAC zotac gaming geforce rtx 3060 ti amp white edition lhr,312,Zotac,8,GDDR6,NVIDIA GeForce RTX 3060 Ti,HDMI,1/29/2025 22:27
