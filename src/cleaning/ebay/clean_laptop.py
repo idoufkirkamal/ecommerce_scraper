@@ -20,7 +20,11 @@ print(f"Cleaned data directory: {CLEANED_DATA_DIR}")
 # Check if raw data directory exists
 if not RAW_DATA_DIR.exists():
     raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR}")
-
+def clean_cpu(cpu):
+    if pd.isna(cpu):
+        return np.nan
+    match = re.search(r'(Core\s+i\d|Ryzen\s+\d|Snapdragon\s+\w+)', str(cpu), re.IGNORECASE)
+    return match.group(0) if match else 'Unknown CPU'
 # Check if there are CSV files to process
 files = list(RAW_DATA_DIR.glob('*.csv'))
 if not files:
@@ -111,6 +115,7 @@ try:
         df['Screen Size'] = df['Screen Size'].str.extract(r'(\d+\.?\d*)').astype(float)
         df = impute_missing_values(df)
         df['GPU'] = df['GPU'].fillna('Unknown Graphics')
+        df['CPU'] = df['CPU'].apply(clean_cpu)
         df['Title'] = df['Title'].apply(clean_title)
         df['Model'] = df['Model'].replace('', np.nan)  # Remplacer '' par NaN pour uniformité
         df['Model'] = df['Model'].fillna(df['Title'])  # Remplacer les NaN dans 'Model' par les valeurs de 'Title'
