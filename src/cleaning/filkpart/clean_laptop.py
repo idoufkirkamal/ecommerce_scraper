@@ -54,14 +54,34 @@ def extract_price(row):
         price = None
     return price
 
+
 def extract_ram(row):
     ram = row['RAM']
     if pd.isna(ram) and isinstance(row['Sales Package'], str):
         match = re.search(r'(\d+)\s*GB', row['Sales Package'])
         if match:
             ram = match.group(1)
+    try:
+        ram = int(ram.replace('GB', '').strip())
+    except (ValueError, AttributeError):
+        ram = None
     return ram
 
+def extract_storage(row):
+    storage = row['SSD Capacity']
+    if pd.isna(storage) and isinstance(row['Sales Package'], str):
+        match = re.search(r'(\d+)\s*GB', row['Sales Package'])
+        if match:
+            storage = match.group(1)
+        else:
+            match = re.search(r'(\d+)\s*TB', row['Sales Package'])
+            if match:
+                storage = int(match.group(1)) * 1024  # Convert TB to GB
+    try:
+        storage = int(storage.replace('GB', '').strip())
+    except (ValueError, AttributeError):
+        storage = None
+    return storage
 def extract_cpu(row):
     cpu = row['Processor Name']
     if pd.isna(cpu) and isinstance(row['Sales Package'], str):
@@ -103,25 +123,19 @@ def extract_screen_size(row):
             return float(match.group(1))
     return screen_size
 
-def extract_storage(row):
-    storage = row['SSD Capacity']
-    if pd.isna(storage) and isinstance(row['Sales Package'], str):
-        match = re.search(r'(\d+)\s*GB', row['Sales Package'])
-        if match:
-            storage = match.group(1)
-        else:
-            match = re.search(r'(\d+)\s*TB', row['Sales Package'])
-            if match:
-                storage = int(match.group(1)) * 1024  # Convert TB to GB
-    return storage
+def extract_collection_date(filename):
+    match = re.search(r'(\d{4}_\d{2}_\d{2})', filename)
+    if match:
+        return match.group(1).replace('_', '-')
+    return None
 
 # Process all CSV files in the raw data directory
 try:
     for file in files:
-        print(f"\nProcessing file: {file}")
+
         df = pd.read_csv(file)
-        print(f"Loaded {len(df)} rows from {file.name}")
-        print(f"Columns in the file: {df.columns.tolist()}")  # Debugging
+         # Debugging
+        collection_date = extract_collection_date(file.stem)
 
         # Apply cleaning and extraction functions
         df['Title'] = df['title'].apply(clean_title)
@@ -133,9 +147,10 @@ try:
         df['GPU'] = df.apply(extract_gpu, axis=1)
         df['Screen Size'] = df.apply(extract_screen_size, axis=1)
         df['Storage'] = df.apply(extract_storage, axis=1)
-
+        df['Collection Date'] = collection_date
         # Keep only necessary columns
-        columns_to_keep = ['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage']
+        columns_to_keep = ['Title', 'Price', 'RAM', 'CPU', 'Model', 'Brand', 'GPU', 'Screen Size', 'Storage',
+                           'Collection Date']
         df_cleaned = df[columns_to_keep].copy()
 
         # Drop rows with missing values

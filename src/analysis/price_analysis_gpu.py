@@ -74,20 +74,6 @@ def load_cleaned_data():
     
     return pd.concat(dfs, ignore_index=True)
 
-def remove_duplicates(df: pd.DataFrame):
-    """
-    Remove duplicate products by calculating their average price.
-    Retain unique products based on Memory Size, Memory Type, and Chipset/GPU Model.
-    """
-    # Group by key specifications and calculate the average price
-    grouped = df.groupby(
-        ['memory_size', 'memory_type', 'chipset/gpu_model', 'platform', 'collection_date']
-    )['price'].mean().reset_index()
-    
-    # Drop duplicates within the same platform and date
-    grouped = grouped.drop_duplicates(subset=['memory_size', 'memory_type', 'chipset/gpu_model', 'platform', 'collection_date'])
-    
-    return grouped
 
 def filter_products_by_platforms(df: pd.DataFrame):
     """Filter products based on their availability across platforms"""
@@ -207,7 +193,7 @@ if __name__ == "__main__":
         df = load_cleaned_data()
         
         # Remove duplicates by calculating the average price
-        df = remove_duplicates(df)
+
         
         # Filter products based on their availability across platforms
         all_platforms_df, two_platforms_df = filter_products_by_platforms(df)
