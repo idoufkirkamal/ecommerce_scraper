@@ -175,10 +175,10 @@ def save_to_csv(data, category, save_directory, fieldnames):
 
 async def main():
     categories = {
-        # "Laptops": "laptop",
+        "Laptops": "laptop",
         "Monitors": "monitor",
         "Smart Watches": "smart watch",
-        # "Graphics Cards": "graphics card"
+        "Graphics Cards": "graphics card"
     }
 
     max_pages = 18

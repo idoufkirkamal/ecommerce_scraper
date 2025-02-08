@@ -16,7 +16,7 @@ os.makedirs(cleaned_data_dir_ebay, exist_ok=True)
 def clean_monitors_ebay(df):
     # 1. Nettoyage de la colonne Price
     if 'Brand' not in df.columns:
-        print("⚠️ La colonne 'Brand' est absente. Une valeur par défaut sera utilisée.")
+        print(" La colonne 'Brand' est absente. Une valeur par défaut sera utilisée.")
         df['Brand'] = 'Unknown'
 
     def clean_price(price):
