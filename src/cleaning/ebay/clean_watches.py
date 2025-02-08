@@ -10,26 +10,20 @@ import re
 # Define paths using relative paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Root folder of the project
 RAW_DATA_DIR_EBAY = BASE_DIR / 'data' / 'raw' / 'ebay' / 'smart_watches'
-RAW_DATA_DIR_UBUY = BASE_DIR / 'data' / 'raw' / 'ubuy' / 'smart_watches'
 CLEANED_DATA_DIR_EBAY = BASE_DIR / 'data' / 'cleaned' / 'ebay' / 'smart_watches'
-CLEANED_DATA_DIR_UBUY = BASE_DIR / 'data' / 'cleaned' / 'ubuy' / 'smart_watches'
 
 # Ensure the cleaned data directories exist
 CLEANED_DATA_DIR_EBAY.mkdir(parents=True, exist_ok=True)
-CLEANED_DATA_DIR_UBUY.mkdir(parents=True, exist_ok=True)
+
 
 # Debugging: Print paths
 print(f"Base directory: {BASE_DIR}")
 print(f"Raw data directory (eBay): {RAW_DATA_DIR_EBAY}")
-print(f"Raw data directory (Ubuy): {RAW_DATA_DIR_UBUY}")
 print(f"Cleaned data directory (eBay): {CLEANED_DATA_DIR_EBAY}")
-print(f"Cleaned data directory (Ubuy): {CLEANED_DATA_DIR_UBUY}")
 
 # Check if raw data directories exist
 if not RAW_DATA_DIR_EBAY.exists():
     raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR_EBAY}")
-if not RAW_DATA_DIR_UBUY.exists():
-    raise FileNotFoundError(f"Raw data directory not found: {RAW_DATA_DIR_UBUY}")
 
 # Function to clean eBay smart watches data
 def clean_smart_watches_ebay(df):
@@ -168,64 +162,8 @@ def clean_smart_watches_ebay(df):
 
     return df
 
-# Function to clean Ubuy smart watches data
-def clean_smartwatch_data(df):
-    # Mapping des colonnes
-    column_mapping = {
-        'title': 'Title',
-        'price': 'Price',
-        'Standing screen display size': 'Case Size',
-        'Battery Capacity': 'Battery Capacity',
-        'Brand': 'Brand',
-        'Item model number': 'Model',
-        'Operating System': 'Operating System',
-        'Memory Storage Capacity': 'Storage Capacity'
-    }
 
-    # Sélection et renommage des colonnes
-    df = df[list(column_mapping.keys())].rename(columns=column_mapping)
 
-    # Nettoyage des colonnes
-    def clean_price(price):
-        if isinstance(price, str):
-            match = re.search(r'MAD\s*(\d+)', price)
-            return int(match.group(1)) if match else None
-        return price
-
-    def clean_size(size):
-        if isinstance(size, str):
-            match = re.search(r'(\d+\.?\d*)\s*(Inches|cm|")', size)
-            return f"{match.group(1)}''" if match else None
-        return size
-
-    def clean_battery(battery):
-        if isinstance(battery, str):
-            match = re.search(r'(\d+\.?\d*E?\+?\d*)\s*Milliamp Hours', battery)
-            return float(match.group(1)) * 1000 if match else None
-        return battery
-
-    cleaners = {
-        'Price': clean_price,
-        'Case Size': clean_size,
-        'Battery Capacity': clean_battery,
-        'Brand': lambda x: x.strip().title() if isinstance(x, str) else x,
-        'Model': lambda x: x.strip().upper() if isinstance(x, str) else x,
-        'Operating System': lambda x: re.sub(r'\s*,\s*', '/', x).title() if isinstance(x, str) else x,
-        'Storage Capacity': lambda x: re.sub(r'\s*MB\s*', 'MB', str(x)).replace(' ', '') if pd.notnull(x) else x
-    }
-
-    for col, func in cleaners.items():
-        df[col] = df[col].apply(func)
-
-    # Conversion des types de données
-    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
-
-    # Suppression des doublons exacts
-    df = df.drop_duplicates()
-
-    return df.reset_index(drop=True)
-
-# Process eBay smart watches
 try:
     for file in RAW_DATA_DIR_EBAY.glob('*.csv'):
         print(f"Processing eBay file: {file}")
@@ -237,14 +175,3 @@ try:
 except Exception as e:
     print(f"An error occurred while processing eBay data: {e}")
 
-# Process Ubuy smart watches
-try:
-    for file in RAW_DATA_DIR_UBUY.glob('*.csv'):
-        print(f"Processing Ubuy file: {file}")
-        df_ubuy = pd.read_csv(file)
-        cleaned_df_ubuy = clean_smartwatch_data(df_ubuy)
-        output_filename = CLEANED_DATA_DIR_UBUY / f"{file.stem}_cleaned.csv"
-        cleaned_df_ubuy.to_csv(output_filename, index=False)
-        print(f"Cleaned data saved to {output_filename}")
-except Exception as e:
-    print(f"An error occurred while processing Ubuy data: {e}")
