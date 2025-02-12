@@ -1,7 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
 from pathlib import Path
 import re
 
@@ -191,9 +190,6 @@ if __name__ == "__main__":
         
         # Load cleaned data for graphics cards
         df = load_cleaned_data()
-        
-        # Remove duplicates by calculating the average price
-
         
         # Filter products based on their availability across platforms
         all_platforms_df, two_platforms_df = filter_products_by_platforms(df)
