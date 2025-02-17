@@ -22,10 +22,7 @@ CLEANED_DATA_DIR_MONITORS.mkdir(parents=True, exist_ok=True)
 # =============================================================================
 
 def clean_price(price, conversion_rate=0.0125):
-    """
-    Convertit une chaîne de caractères représentant un prix en une valeur numérique en dollars.
-    Si le prix commence par "₹", le symbole est retiré et le montant est converti.
-    """
+
     if isinstance(price, str):
         price = price.strip().replace(" ", "")
         if price.startswith("₹"):
@@ -74,9 +71,7 @@ def extract_aspect_ratio(title):
 
 
 def extract_refresh_rate(text):
-    """
-    Extrait la première valeur numérique d'une chaîne (par exemple "60 Hz (Analog), 60 Hz (Digital)" → 60.0).
-    """
+
     if isinstance(text, str):
         match = re.search(r'(\d+(?:\.\d+)?)', text)
         if match:
